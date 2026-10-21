@@ -1,0 +1,26 @@
+{
+  "name": "system.dbmsxsia",
+  "version": "1.0.0",
+  "description": "FinalProject",
+  "keywords": [
+    "SIAxDBMS_2026FinalG5"
+  ],
+  "homepage": "https://github.com/peraltaisaiahjaireh-maker/SYSTEM.SIAxDBMS_GROUP5#readme",
+  "bugs": {
+    "url": "https://github.com/peraltaisaiahjaireh-maker/SYSTEM.SIAxDBMS_GROUP5/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peraltaisaiahjaireh-maker/SYSTEM.SIAxDBMS_GROUP5.git"
+  },
+  "license": "ISC",
+  "author": "Isaiah Jaireh S. Peralta and six others",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
