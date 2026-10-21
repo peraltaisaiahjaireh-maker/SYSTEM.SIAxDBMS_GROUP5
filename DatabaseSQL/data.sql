@@ -1,4 +1,5 @@
-<<<<<<< HEAD
+<< Soundsync Database Schema >>
+
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(300) UNIQUE NOT NULL,
@@ -144,7 +145,4 @@ CREATE TABLE audit_logs (
 
 
 
-=======
-soundsync_db DATABASE
->>>>>>> 9243713e51e6432ef5aaa7f21b88dcb85631cb4d
 
