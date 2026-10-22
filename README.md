@@ -16,10 +16,10 @@ System.DBMSxSIA/
 │   │   └── soundSyncModel.js      
 │   └── routes.js         
 │
-├── frontend/
-│   ├── index.html         
-│   ├── style.css          
-│   └── app.js             
+├── frontend/          -- FOLDER
+│   ├── index.html     -- File Superio
+│   ├── style.css      -- File Superio
+│   └── app.js         -- File Salva
 │
 ├── .env                   
 ├── .env.example           
