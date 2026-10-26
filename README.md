@@ -1,31 +1,5 @@
 # SYSTEM.SIAxDBMS_GROUP5
-//SAMPLE MVC's
-
-System.DBMSxSIA/
-│
-├── database/
-│   ├── schema.sql         
-│   └── data.sql          
-│
-├── backend/
-│   ├── config/
-│   │   └── db.js         
-│   ├── controllers/
-│   │   └── soundSyncController.js 
-│   ├── models/
-│   │   └── soundSyncModel.js      
-│   └── routes.js         
-│
-├── frontend/          -- FOLDER
-│   ├── index.html     -- File Superio
-│   ├── style.css      -- File Superio
-│   └── app.js         -- File Salva
-│
-├── .env                   
-├── .env.example           
-├── index.js               
-├── package.json           
-└── README.md              
+//SAMPLE MVC's           
 
 SOUNDSYNC 
 ├── .gitignore
@@ -49,5 +23,5 @@ SOUNDSYNC
 │   └── app.js
 │       
 └── database/
-    ├── schema.sql // Maybe we wil only use local MySQL database
-    └── data.sql   // Still dont know how to use this
+    ├── schema.sql 
+    └── data.sql   
