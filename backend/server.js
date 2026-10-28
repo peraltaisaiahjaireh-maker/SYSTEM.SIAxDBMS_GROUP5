@@ -24,7 +24,7 @@ app,use(function(err, req,res,next){
     controller.handleError(res,err);
 });
 
-const PORT = process.env.PORT  3000;
+const PORT = process.env.PORT || 3000;
 
 db.query('SELECT 1')
 .then(function (){
