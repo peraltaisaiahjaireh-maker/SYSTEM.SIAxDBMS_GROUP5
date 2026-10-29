@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SoundSync</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="loading" class="hidden">Loading...</div>
+
+  <!-- LOGIN / CREATE ACCOUNT -->
+  <div id="loginScreen" class="hidden">
+    <div class="login-box">
+      <h1>SoundSync</h1>
+
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <h2>Log in</h2>
+        <label>Email <input type="email" id="loginEmail" required maxlength="100"></label>
+        <label>Password <input type="password" id="loginPassword" required maxlength="100"></label>
+        <p id="loginError" class="error-text"></p>
+        <button type="submit" class="primary">Log in</button>
+        <p class="small-text">No account yet? <a href="#" onclick="showRegister(true); return false;">Create one</a></p>
+      </form>
+
+      <form id="registerForm" class="hidden" onsubmit="doRegister(event)">
+        <h2>Create account</h2>
+        <label>Username <input type="text" id="regUsername" required maxlength="100"></label>
+        <label>Email <input type="email" id="regEmail" required maxlength="100"></label>
+        <label>Password (at least 6 characters) <input type="password" id="regPassword" required minlength="6"
+            maxlength="100"></label>
+        <p id="registerError" class="error-text"></p>
+        <button type="submit" class="primary">Create account</button>
+        <p class="small-text">Already have an account? <a href="#" onclick="showRegister(false); return false;">Log
+            in</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- THE APP -->
+  <div id="appScreen" class="hidden">
+    <div id="layout">
+      <aside id="sidebar">
+        <a class="brand" href="#" onclick="showPage('songs'); return false;">
+          <span class="brand-mark" aria-hidden="true">♫</span>
+          <span>SoundSync</span>
+        </a>
+        <p class="sidebar-label">YOUR LIBRARY</p>
+        <ul id="menu"></ul>
+        <div class="sidebar-note">
+          <span class="sidebar-note-icon" aria-hidden="true">♪</span>
+          <p>Your music, your mood.</p>
+          <span>Keep your favorite sounds close.</span>
+        </div>
+      </aside>
+
+      <div id="contentWrap">
+        <header id="topbar">
+          <div class="topbar-copy">
+            <span class="eyebrow">YOUR PERSONAL MUSIC SPACE</span>
+            <span id="userInfo"></span>
+          </div>
+          <button type="button" class="logout-button" onclick="doLogout()">Log out <span aria-hidden="true">↗</span></button>
+        </header>
+        <main id="main">
+          <div id="message" class="hidden" role="status"></div>
+          <div id="page"></div>
+        </main>
+      </div>
+    </div>
+
+    <footer id="player" aria-label="Music player">
+      <div id="playerTrack">
+        <div class="player-art" aria-hidden="true"><span>♫</span></div>
+        <div class="player-track-copy">
+          <span id="playerTitle">Nothing playing</span>
+          <span id="playerArtist">Choose a song to get started</span>
+        </div>
+      </div>
+      <div class="player-center">
+        <div class="player-controls">
+          <button type="button" class="player-icon" aria-label="Play previous song" title="Previous" onclick="playPreviousSong()">|◀</button>
+          <button type="button" id="playPauseButton" class="player-play" aria-label="Play" title="Play" onclick="togglePlayback()">▶</button>
+          <button type="button" class="player-icon" aria-label="Play next song" title="Next" onclick="playNextSong()">▶|</button>
+        </div>
+        <div class="player-progress">
+          <span id="playerElapsed">0:00</span>
+          <input id="playerSeek" type="range" min="0" max="1000" value="0" aria-label="Seek through song" oninput="seekSong(this.value)">
+          <span id="playerTime">0:00</span>
+        </div>
+      </div>
+      <div class="player-extras">
+        <span aria-hidden="true" class="volume-icon">◖</span>
+        <input id="playerVolume" type="range" min="0" max="100" value="70" aria-label="Volume" oninput="setPlayerVolume(this.value)">
+        <button type="button" class="player-icon stop-button" aria-label="Stop playback" title="Stop" onclick="stopSong()">■</button>
+      </div>
+      <audio id="local-audio" preload="none"></audio>
+      <div id="yt-player-container" aria-label="YouTube audio player"></div>
+    </footer>
+  </div>
+
+  <!-- popup form used for adding / editing -->
+  <dialog id="dialog">
+    <form id="dialogForm"></form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
