@@ -21,7 +21,6 @@ SOUNDSYNC
 │   ├── index.html
 │   ├── style.css
 │   └── app.js
-│       
 └── database/
     ├── schema.sql 
     └── data.sql   
