@@ -915,11 +915,7 @@ async function deleteComment(req, res) {
   }
 }
 
-<<<<<<< HEAD
 //GJ-CHYLL MORTE
-=======
-// Morte gwapo
->>>>>>> 8ae03e7aab89b7c640a5eb6d8b198ace1be56377
 // REPORTS (the three joins)
 
 async function reportSongs(req, res) {
