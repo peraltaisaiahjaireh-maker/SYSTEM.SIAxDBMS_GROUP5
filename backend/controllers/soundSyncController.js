@@ -280,3 +280,276 @@ async function deleteMe(req, res) {
     handleError(res, err);
   }
 }
+
+//akoa jherald
+
+// ARTISTS AND ALBUMS
+
+async function listArtists(req, res) {
+  try {
+    sendSuccess(res, 200, 'Artists loaded', await model.getArtists());
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function getArtist(req, res) {
+  try {
+    const artist = await model.getArtist(cleanNumber(req.params.id, 'Artist id'));
+    if (!artist) {
+      throw makeError(404, 'Artist not found');
+    }
+    sendSuccess(res, 200, 'Artist loaded', artist);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function createArtist(req, res) {
+  try {
+    const name = cleanText(req.body.artist_name, 'Artist name', 100);
+    const artistId = await model.createArtist(name);
+    sendSuccess(res, 201, 'Artist added', await model.getArtist(artistId));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function updateArtist(req, res) {
+  try {
+    const artistId = cleanNumber(req.params.id, 'Artist id');
+    const name = cleanText(req.body.artist_name, 'Artist name', 100);
+    if (!(await model.getArtist(artistId))) {
+      throw makeError(404, 'Artist not found');
+    }
+    await model.updateArtist(artistId, name);
+    sendSuccess(res, 200, 'Artist updated', await model.getArtist(artistId));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function deleteArtist(req, res) {
+  try {
+    const artistId = cleanNumber(req.params.id, 'Artist id');
+    if (!(await model.getArtist(artistId))) {
+      throw makeError(404, 'Artist not found');
+    }
+    const songs = (await model.getSongs()).filter(function (song) {
+      return Number(song.artist_id) === artistId;
+    });
+    await model.deleteArtist(artistId);
+    songs.forEach(function (song) { removeStoredAudio(song.audio_path); });
+    sendSuccess(res, 200, 'Artist deleted', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function listAlbums(req, res) {
+  try {
+    sendSuccess(res, 200, 'Albums loaded', await model.getAlbums());
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function createAlbum(req, res) {
+  try {
+    const title = cleanText(req.body.album_title, 'Album title', 100);
+    const artistId = cleanNumber(req.body.artist_id, 'Artist');
+    if (!(await model.getArtist(artistId))) {
+      throw makeError(400, 'That artist does not exist');
+    }
+    const albumId = await model.createAlbum(title, artistId);
+    sendSuccess(res, 201, 'Album added', await model.getAlbum(albumId));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+
+// SONGS AND GENRES
+
+// adds a "genres" list and a "genre_id" to each song
+async function addGenresToSongs(songs) {
+  const genreRows = await model.getAllSongGenres();
+  for (let i = 0; i < songs.length; i++) {
+    songs[i].genres = [];
+    songs[i].genre_id = null;
+    for (let j = 0; j < genreRows.length; j++) {
+      if (genreRows[j].song_id === songs[i].song_id) {
+        songs[i].genres.push(genreRows[j].genre_name);
+        if (songs[i].genre_id === null) {
+          songs[i].genre_id = genreRows[j].genre_id;
+        }
+      }
+    }
+  }
+  return songs;
+}
+
+// reads and checks the song fields from the request body
+async function readSongBody(body) {
+  const song = {
+    title: cleanText(body.title, 'Title', 100),
+    artistId: cleanNumber(body.artist_id, 'Artist'),
+    albumId: cleanNumber(body.album_id, 'Album'),
+    duration: cleanNumber(body.duration, 'Length (seconds)'),
+    genreId: cleanOptionalNumber(body.genre_id, 'Genre'),
+    youtubeId: extractYouTubeId(body.youtube_id)
+  };
+  if (song.duration > 36000) {
+    throw makeError(400, 'Length is too long');
+  }
+  const album = await model.getAlbum(song.albumId);
+  if (!album) {
+    throw makeError(400, 'That album does not exist');
+  }
+  if (album.artist_id !== song.artistId) {
+    throw makeError(400, 'That album belongs to a different artist');
+  }
+  return song;
+}
+
+async function listSongs(req, res) {
+  try {
+    const songs = await addGenresToSongs(await model.getSongs());
+    sendSuccess(res, 200, 'Songs loaded', songs);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function getSong(req, res) {
+  try {
+    const song = await loadSong(cleanNumber(req.params.id, 'Song id'));
+    const songs = await addGenresToSongs([song]);
+    sendSuccess(res, 200, 'Song loaded', songs[0]);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function listGenres(req, res) {
+  try {
+    sendSuccess(res, 200, 'Genres loaded', await model.getGenres());
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function createSong(req, res) {
+  try {
+    const song = await readSongBody(req.body);
+    const songId = await model.createSong(song.title, song.artistId, song.albumId, song.duration, song.genreId, song.youtubeId);
+    const created = await addGenresToSongs([await model.getSong(songId)]);
+    sendSuccess(res, 201, 'Song added', created[0]);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function uploadSongAudio(req, res) {
+  let uploadedPath = null;
+  try {
+    const songId = cleanNumber(req.params.id, 'Song id');
+    const song = await loadSong(songId);
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+      throw makeError(400, 'Choose an audio file to upload');
+    }
+
+    let filename;
+    try {
+      filename = decodeURIComponent(req.headers['x-audio-filename'] || '');
+    } catch (err) {
+      throw makeError(400, 'The audio filename is invalid');
+    }
+    const extension = path.extname(filename).toLowerCase();
+    if (!AUDIO_EXTENSIONS.includes(extension)) {
+      throw makeError(400, 'Choose an MP3, M4A, AAC, OGG, WAV, FLAC, or MP4 audio file');
+    }
+    const contentType = req.headers['content-type'] || '';
+    if (!contentType.startsWith('audio/') && contentType !== 'application/octet-stream' &&
+      !(contentType === 'video/mp4' && extension === '.mp4')) {
+      throw makeError(400, 'The uploaded file is not a supported audio type');
+    }
+
+    const storedName = crypto.randomBytes(16).toString('hex') + extension;
+    uploadedPath = path.join(uploadsDir, storedName);
+    await fs.promises.mkdir(uploadsDir, { recursive: true });
+    await fs.promises.writeFile(uploadedPath, req.body, { flag: 'wx' });
+    const audioPath = '/media/' + storedName;
+    await model.setSongAudioPath(songId, audioPath);
+    removeStoredAudio(song.audio_path);
+    sendSuccess(res, 200, 'Audio uploaded', { audio_path: audioPath });
+  } catch (err) {
+    if (uploadedPath) {
+      await fs.promises.unlink(uploadedPath).catch(function (unlinkError) {
+        if (unlinkError.code !== 'ENOENT') {
+          console.error('Could not remove incomplete audio upload:', unlinkError);
+        }
+      });
+    }
+    handleError(res, err);
+  }
+}
+
+function removeStoredAudio(audioPath) {
+  if (!audioPath) {
+    return;
+  }
+  const filename = path.basename(audioPath);
+  fs.promises.unlink(path.join(uploadsDir, filename)).catch(function (err) {
+    if (err.code !== 'ENOENT') {
+      console.error('Could not remove stored audio file:', err);
+    }
+  });
+}
+
+async function streamSongAudio(req, res) {
+  try {
+    const songId = cleanNumber(req.params.id, 'Song id');
+    const song = await loadSong(songId);
+    if (!song.audio_path) {
+      throw makeError(404, 'This song has no uploaded audio file');
+    }
+    const filename = path.basename(song.audio_path);
+    res.sendFile(filename, { root: uploadsDir }, function (err) {
+      if (err && !res.headersSent) {
+        handleError(res, err);
+      }
+    });
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function updateSong(req, res) {
+  try {
+    const songId = cleanNumber(req.params.id, 'Song id');
+    const existing = await loadSong(songId);
+    const song = await readSongBody(req.body);
+    await model.updateSong(songId, song.title, song.artistId, song.albumId, song.duration, song.genreId, song.youtubeId);
+    if (song.youtubeId && existing.audio_path) {
+      await model.setSongAudioPath(songId, null);
+      removeStoredAudio(existing.audio_path);
+    }
+    const updated = await addGenresToSongs([await model.getSong(songId)]);
+    sendSuccess(res, 200, 'Song updated', updated[0]);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function deleteSong(req, res) {
+  try {
+    const songId = cleanNumber(req.params.id, 'Song id');
+    const song = await loadSong(songId);
+    await model.deleteSong(songId);
+    removeStoredAudio(song.audio_path);
+    sendSuccess(res, 200, 'Song deleted', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
