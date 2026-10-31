@@ -1,5 +1,5 @@
+//ISAIAH JAIREH S. PERALTA
 // CONTROLLER: receives the request, checks the input, calls the model, sends the response.
-
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -41,7 +41,7 @@ function handleError(res, err) {
   sendError(res, 500, 'Something went wrong on the server');
 }
 
-// input checking 
+//input checking 
 
 // required text with a maximum length
 function cleanText(value, name, maxLength) {
@@ -55,7 +55,7 @@ function cleanText(value, name, maxLength) {
   return text;
 }
 
-// whole number that is 1 or more 
+// whole number that is 1 or more (used for ids, duration, ...)
 function cleanNumber(value, name) {
   const number = Number(value);
   if (value === '' || value === null || value === undefined || !Number.isInteger(number) || number < 1) {
@@ -88,7 +88,6 @@ function cleanEmail(value) {
   }
   return email;
 }
-
 ///////////////////////////////////////////////////////////
 function extractYouTubeId(url) {
   if (typeof url !== 'string' || url.trim() === '') {
@@ -125,7 +124,7 @@ function extractYouTubeId(url) {
   return videoId;
 }
 
-// loading things that must exist 
+// ----- loading things that must exist -----
 
 async function loadSong(songId) {
   const song = await model.getSong(songId);
@@ -147,9 +146,69 @@ async function loadMyPlaylist(req) {
   }
   return playlist;
 }
-////////////////////////////////////////////////////
 
-// LOGIN CHECK (used by routes that need a logged-in user)
+
+
+////////////////////////////////////////////////////
+// delete album
+async function deleteAlbum(req, res) {
+  try {
+    const albumId = cleanNumber(req.params.id, 'Album id');
+    if (!(await model.getAlbum(albumId))) {
+      throw makeError(404, 'Album not found');
+    }
+    const songs = (await model.getSongs()).filter(function (song) {
+      return Number(song.album_id) === albumId;
+    });
+    await model.deleteAlbum(albumId);
+    songs.forEach(function (song) { removeStoredAudio(song.audio_path); });
+    sendSuccess(res, 200, 'Album deleted', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+// adds a "genres" list and a "genre_id" to each song
+async function addGenresToSongs(songs) {
+  const genreRows = await model.getAllSongGenres();
+  for (let i = 0; i < songs.length; i++) {
+    songs[i].genres = [];
+    songs[i].genre_id = null;
+    for (let j = 0; j < genreRows.length; j++) {
+      if (genreRows[j].song_id === songs[i].song_id) {
+        songs[i].genres.push(genreRows[j].genre_name);
+        if (songs[i].genre_id === null) {
+          songs[i].genre_id = genreRows[j].genre_id;
+        }
+      }
+    }
+  }
+  return songs;
+}
+
+// reads and checks the song fields from the request body
+async function readSongBody(body) {
+  const song = {
+    title: cleanText(body.title, 'Title', 100),
+    artistId: cleanNumber(body.artist_id, 'Artist'),
+    albumId: cleanNumber(body.album_id, 'Album'),
+    duration: cleanNumber(body.duration, 'Length (seconds)'),
+    genreId: cleanOptionalNumber(body.genre_id, 'Genre'),
+    youtubeId: extractYouTubeId(body.youtube_id)
+  };
+  if (song.duration > 36000) {
+    throw makeError(400, 'Length is too long');
+  }
+  const album = await model.getAlbum(song.albumId);
+  if (!album) {
+    throw makeError(400, 'That album does not exist');
+  }
+  if (album.artist_id !== song.artistId) {
+    throw makeError(400, 'That album belongs to a different artist');
+  }
+  return song;
+}
+
+// LOGIN CHECK 
 
 function requireLogin(req, res, next) {
   const token = req.headers.authorization;
@@ -281,7 +340,8 @@ async function deleteMe(req, res) {
   }
 }
 
-//akoa jherald
+
+// JHERALD SALVA
 
 // ARTISTS AND ALBUMS
 
@@ -368,49 +428,7 @@ async function createAlbum(req, res) {
   }
 }
 
-
 // SONGS AND GENRES
-
-// adds a "genres" list and a "genre_id" to each song
-async function addGenresToSongs(songs) {
-  const genreRows = await model.getAllSongGenres();
-  for (let i = 0; i < songs.length; i++) {
-    songs[i].genres = [];
-    songs[i].genre_id = null;
-    for (let j = 0; j < genreRows.length; j++) {
-      if (genreRows[j].song_id === songs[i].song_id) {
-        songs[i].genres.push(genreRows[j].genre_name);
-        if (songs[i].genre_id === null) {
-          songs[i].genre_id = genreRows[j].genre_id;
-        }
-      }
-    }
-  }
-  return songs;
-}
-
-// reads and checks the song fields from the request body
-async function readSongBody(body) {
-  const song = {
-    title: cleanText(body.title, 'Title', 100),
-    artistId: cleanNumber(body.artist_id, 'Artist'),
-    albumId: cleanNumber(body.album_id, 'Album'),
-    duration: cleanNumber(body.duration, 'Length (seconds)'),
-    genreId: cleanOptionalNumber(body.genre_id, 'Genre'),
-    youtubeId: extractYouTubeId(body.youtube_id)
-  };
-  if (song.duration > 36000) {
-    throw makeError(400, 'Length is too long');
-  }
-  const album = await model.getAlbum(song.albumId);
-  if (!album) {
-    throw makeError(400, 'That album does not exist');
-  }
-  if (album.artist_id !== song.artistId) {
-    throw makeError(400, 'That album belongs to a different artist');
-  }
-  return song;
-}
 
 async function listSongs(req, res) {
   try {
@@ -554,9 +572,8 @@ async function deleteSong(req, res) {
   }
 }
 
-//superio mems kaen
+//ANTHONY SUPERIO
 // PLAYLISTS
-
 
 async function listPlaylists(req, res) {
   try {
@@ -636,9 +653,7 @@ async function removeSongFromPlaylist(req, res) {
   }
 }
 
-
 // FAVORITES, DOWNLOADS
-
 
 async function listFavorites(req, res) {
   try {
@@ -787,7 +802,7 @@ async function clearHistory(req, res) {
   }
 }
 
-//sienes fortune pink
+//JADGE ETHAN ROY SIENES
 
 // RATINGS AND COMMENTS
 
@@ -899,3 +914,9 @@ async function deleteComment(req, res) {
     handleError(res, err);
   }
 }
+
+//GJ-CHYLL MORTE
+//Diri i paste buseng
+
+// REPORTS (the three joins)
+
