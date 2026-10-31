@@ -2,7 +2,7 @@
 const db = require('../config/db');
 
 
-/////////////////////////////////////////////////////////////////////////////////////////JHERALD
+//JHERALD SALVA
 
 // USERS, PROFILE, SETTINGS
 async function findUserByEmail(email) {
@@ -70,7 +70,85 @@ async function deleteUser(userId) {
   }
   await db.query('DELETE FROM users WHERE user_id = ?', [userId]);
 }
-//////////////////////////////////////////////////////////////////////////////////////SUPERIO
+
+//GJ-CHYLL MORTE
+//PASTE RA DIRI BUSENG
+
+
+
+//JADGE ETHAN ROY SIENES
+// SONGS AND GENRES
+
+// JOIN 1 (INNER JOIN): songs together with their artist and album names
+const SONG_QUERY = `
+  SELECT songs.song_id, songs.title AS song_title, songs.artist_id, songs.album_id,
+         artists.artist_name, albums.album_title, songs.duration, songs.youtube_id, songs.audio_path
+  FROM songs
+  INNER JOIN artists ON songs.artist_id = artists.artist_id
+  INNER JOIN albums ON songs.album_id = albums.album_id`;
+
+async function getSongs() {
+  const [rows] = await db.query(SONG_QUERY + ' ORDER BY songs.title');
+  return rows;
+}
+
+async function getSong(songId) {
+  const [rows] = await db.query(SONG_QUERY + ' WHERE songs.song_id = ?', [songId]);
+  return rows[0];
+}
+
+async function getGenres() {
+  const [rows] = await db.query('SELECT genre_id, genre_name FROM genres ORDER BY genre_name');
+  return rows;
+}
+
+// genre names of every song (the controller attaches them to the songs)
+async function getAllSongGenres() {
+  const [rows] = await db.query(
+    `SELECT song_genres.song_id, genres.genre_id, genres.genre_name
+     FROM song_genres
+     INNER JOIN genres ON song_genres.genre_id = genres.genre_id`
+  );
+  return rows;
+}
+
+async function createSong(title, artistId, albumId, duration, genreId, youtubeId) {
+  const [result] = await db.query(
+    'INSERT INTO songs (title, artist_id, album_id, duration, youtube_id) VALUES (?, ?, ?, ?, ?)',
+    [title, artistId, albumId, duration, youtubeId]
+  );
+  if (genreId) {
+    await db.query('INSERT INTO song_genres (song_id, genre_id) VALUES (?, ?)', [result.insertId, genreId]);
+  }
+  return result.insertId;
+}
+
+async function updateSong(songId, title, artistId, albumId, duration, genreId, youtubeId) {
+  await db.query(
+    'UPDATE songs SET title = ?, artist_id = ?, album_id = ?, duration = ?, youtube_id = ? WHERE song_id = ?',
+    [title, artistId, albumId, duration, youtubeId, songId]
+  );
+  await db.query('DELETE FROM song_genres WHERE song_id = ?', [songId]);
+  if (genreId) {
+    await db.query('INSERT INTO song_genres (song_id, genre_id) VALUES (?, ?)', [songId, genreId]);
+  }
+}
+
+async function setSongAudioPath(songId, audioPath) {
+  await db.query('UPDATE songs SET audio_path = ? WHERE song_id = ?', [audioPath, songId]);
+}
+
+async function deleteSong(songId) {
+  // remove the song from every table that uses it, then delete the song
+  const tables = ['playlist_songs', 'favorites', 'history', 'ratings', 'comments', 'queue', 'downloads', 'song_genres'];
+  for (let i = 0; i < tables.length; i++) {
+    await db.query('DELETE FROM ' + tables[i] + ' WHERE song_id = ?', [songId]);
+  }
+  await db.query('DELETE FROM songs WHERE song_id = ?', [songId]);
+}
+
+
+// ANTHONY SUPERIO
 // PLAYLISTS
 
 async function getPlaylists(userId) {
@@ -252,76 +330,134 @@ async function clearHistory(userId) {
   await db.query('DELETE FROM history WHERE user_id = ?', [userId]);
 }
 
-//sienes
-// SONGS AND GENRES
 
-// JOIN 1 (INNER JOIN): songs together with their artist and album names
-const SONG_QUERY = `
-  SELECT songs.song_id, songs.title AS song_title, songs.artist_id, songs.album_id,
-         artists.artist_name, albums.album_title, songs.duration, songs.youtube_id, songs.audio_path
-  FROM songs
-  INNER JOIN artists ON songs.artist_id = artists.artist_id
-  INNER JOIN albums ON songs.album_id = albums.album_id`;
+//ISAIAH JAIREH S. PERALTA
 
-async function getSongs() {
-  const [rows] = await db.query(SONG_QUERY + ' ORDER BY songs.title');
+// RATINGS AND COMMENTS
+
+async function getRatings(userId) {
+  const [rows] = await db.query(
+    `SELECT ratings.rating_id, ratings.song_id, ratings.score, songs.title AS song_title, artists.artist_name
+     FROM ratings
+     INNER JOIN songs ON ratings.song_id = songs.song_id
+     INNER JOIN artists ON songs.artist_id = artists.artist_id
+     WHERE ratings.user_id = ?
+     ORDER BY ratings.rating_id DESC`,
+    [userId]
+  );
   return rows;
 }
 
-async function getSong(songId) {
-  const [rows] = await db.query(SONG_QUERY + ' WHERE songs.song_id = ?', [songId]);
+async function getRating(ratingId) {
+  const [rows] = await db.query('SELECT rating_id, user_id, song_id, score FROM ratings WHERE rating_id = ?', [ratingId]);
   return rows[0];
 }
 
-async function getGenres() {
-  const [rows] = await db.query('SELECT genre_id, genre_name FROM genres ORDER BY genre_name');
-  return rows;
+async function findRating(userId, songId) {
+  const [rows] = await db.query('SELECT rating_id FROM ratings WHERE user_id = ? AND song_id = ?', [userId, songId]);
+  return rows[0];
 }
 
-// genre names of every song (the controller attaches them to the songs)
-async function getAllSongGenres() {
-  const [rows] = await db.query(
-    `SELECT song_genres.song_id, genres.genre_id, genres.genre_name
-     FROM song_genres
-     INNER JOIN genres ON song_genres.genre_id = genres.genre_id`
-  );
-  return rows;
-}
-
-async function createSong(title, artistId, albumId, duration, genreId, youtubeId) {
-  const [result] = await db.query(
-    'INSERT INTO songs (title, artist_id, album_id, duration, youtube_id) VALUES (?, ?, ?, ?, ?)',
-    [title, artistId, albumId, duration, youtubeId]
-  );
-  if (genreId) {
-    await db.query('INSERT INTO song_genres (song_id, genre_id) VALUES (?, ?)', [result.insertId, genreId]);
-  }
+async function createRating(userId, songId, score) {
+  const [result] = await db.query('INSERT INTO ratings (user_id, song_id, score) VALUES (?, ?, ?)', [userId, songId, score]);
   return result.insertId;
 }
 
-async function updateSong(songId, title, artistId, albumId, duration, genreId, youtubeId) {
-  await db.query(
-    'UPDATE songs SET title = ?, artist_id = ?, album_id = ?, duration = ?, youtube_id = ? WHERE song_id = ?',
-    [title, artistId, albumId, duration, youtubeId, songId]
+async function updateRating(ratingId, score) {
+  await db.query('UPDATE ratings SET score = ? WHERE rating_id = ?', [score, ratingId]);
+}
+
+async function deleteRating(ratingId) {
+  await db.query('DELETE FROM ratings WHERE rating_id = ?', [ratingId]);
+}
+
+async function getComments(songId) {
+  const [rows] = await db.query(
+    `SELECT comments.comment_id, comments.user_id, comments.comment_text, users.username
+     FROM comments
+     INNER JOIN users ON comments.user_id = users.user_id
+     WHERE comments.song_id = ?
+     ORDER BY comments.comment_id`,
+    [songId]
   );
-  await db.query('DELETE FROM song_genres WHERE song_id = ?', [songId]);
-  if (genreId) {
-    await db.query('INSERT INTO song_genres (song_id, genre_id) VALUES (?, ?)', [songId, genreId]);
-  }
+  return rows;
 }
 
-async function setSongAudioPath(songId, audioPath) {
-  await db.query('UPDATE songs SET audio_path = ? WHERE song_id = ?', [audioPath, songId]);
+async function getComment(commentId) {
+  const [rows] = await db.query(
+    'SELECT comment_id, user_id, song_id, comment_text FROM comments WHERE comment_id = ?',
+    [commentId]
+  );
+  return rows[0];
 }
 
-async function deleteSong(songId) {
-  // remove the song from every table that uses it, then delete the song
-  const tables = ['playlist_songs', 'favorites', 'history', 'ratings', 'comments', 'queue', 'downloads', 'song_genres'];
-  for (let i = 0; i < tables.length; i++) {
-    await db.query('DELETE FROM ' + tables[i] + ' WHERE song_id = ?', [songId]);
-  }
-  await db.query('DELETE FROM songs WHERE song_id = ?', [songId]);
+async function createComment(userId, songId, text) {
+  const [result] = await db.query('INSERT INTO comments (user_id, song_id, comment_text) VALUES (?, ?, ?)', [userId, songId, text]);
+  return result.insertId;
 }
 
+async function updateComment(commentId, text) {
+  await db.query('UPDATE comments SET comment_text = ? WHERE comment_id = ?', [text, commentId]);
+}
 
+async function deleteComment(commentId) {
+  await db.query('DELETE FROM comments WHERE comment_id = ?', [commentId]);
+}
 
+// REPORTS (the three joins)
+
+// JOIN 1: INNER JOIN. Songs with their artist and album names.
+async function reportSongs() {
+  const [rows] = await db.query(
+    `SELECT songs.song_id, songs.title AS song_title, artists.artist_name, albums.album_title
+     FROM songs
+     INNER JOIN artists ON songs.artist_id = artists.artist_id
+     INNER JOIN albums ON songs.album_id = albums.album_id`
+  );
+  return rows;
+}
+
+// JOIN 2: LEFT JOIN. All users and their playlists (users with 0 playlists are included).
+async function reportUsersPlaylists() {
+  const [rows] = await db.query(
+    `SELECT users.username, playlists.playlist_name
+     FROM users
+     LEFT JOIN playlists ON users.user_id = playlists.user_id`
+  );
+  return rows;
+}
+
+// JOIN 3: FULL OUTER JOIN.
+// LEFT JOIN and a RIGHT JOIN combined with UNION. This shows everything from both sides.
+async function reportUsersPlaylistsFull() {
+  const [rows] = await db.query(
+    `SELECT users.username, playlists.playlist_name
+     FROM users
+     LEFT JOIN playlists ON users.user_id = playlists.user_id
+
+     UNION
+ 
+     SELECT users.username, playlists.playlist_name
+     FROM users
+     RIGHT JOIN playlists ON users.user_id = playlists.user_id`
+  );
+  return rows;
+}
+
+module.exports = {
+  findUserByEmail, createUser, loginUser, getUser, getProfile, getSettings,
+  createAlbum, deleteAlbum,
+  updateUser, updateBio, updateTheme, deleteUser,
+  getArtists, getArtist, createArtist, updateArtist, deleteArtist,
+  getAlbums, getAlbum, createAlbum,
+  getSongs, getSong, getGenres, getAllSongGenres, createSong, updateSong, setSongAudioPath, deleteSong,
+  getPlaylists, getPlaylist, getPlaylistSongs, createPlaylist, renamePlaylist, deletePlaylist,
+  isSongInPlaylist, addSongToPlaylist, removeSongFromPlaylist,
+  getFavorites, isFavorite, addFavorite, removeFavorite,
+  getDownloads, getDownload, isDownloaded, addDownload, removeDownload,
+  getQueue, getQueueItem, addToQueue, removeFromQueue, clearQueue,
+  getHistory, addHistory, clearHistory,
+  getRatings, getRating, findRating, createRating, updateRating, deleteRating,
+  getComments, getComment, createComment, updateComment, deleteComment,
+  reportSongs, reportUsersPlaylists, reportUsersPlaylistsFull
+};
