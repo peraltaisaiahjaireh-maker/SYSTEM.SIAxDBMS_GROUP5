@@ -553,3 +553,236 @@ async function deleteSong(req, res) {
     handleError(res, err);
   }
 }
+
+//superio mems kaen
+// PLAYLISTS
+
+
+async function listPlaylists(req, res) {
+  try {
+    sendSuccess(res, 200, 'Playlists loaded', await model.getPlaylists(req.user.user_id));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function getPlaylist(req, res) {
+  try {
+    const playlist = await loadMyPlaylist(req);
+    playlist.songs = await model.getPlaylistSongs(playlist.playlist_id);
+    sendSuccess(res, 200, 'Playlist loaded', playlist);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function createPlaylist(req, res) {
+  try {
+    const name = cleanText(req.body.playlist_name, 'Playlist name', 100);
+    const playlistId = await model.createPlaylist(req.user.user_id, name);
+    sendSuccess(res, 201, 'Playlist created', await model.getPlaylist(playlistId));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function renamePlaylist(req, res) {
+  try {
+    const playlist = await loadMyPlaylist(req);
+    const name = cleanText(req.body.playlist_name, 'Playlist name', 100);
+    await model.renamePlaylist(playlist.playlist_id, name);
+    sendSuccess(res, 200, 'Playlist renamed', await model.getPlaylist(playlist.playlist_id));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function deletePlaylist(req, res) {
+  try {
+    const playlist = await loadMyPlaylist(req);
+    await model.deletePlaylist(playlist.playlist_id);
+    sendSuccess(res, 200, 'Playlist deleted', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function addSongToPlaylist(req, res) {
+  try {
+    const playlist = await loadMyPlaylist(req);
+    const songId = cleanNumber(req.body.song_id, 'Song');
+    await loadSong(songId);
+    if (await model.isSongInPlaylist(playlist.playlist_id, songId)) {
+      throw makeError(400, 'That song is already in this playlist');
+    }
+    await model.addSongToPlaylist(playlist.playlist_id, songId);
+    sendSuccess(res, 201, 'Song added to playlist', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function removeSongFromPlaylist(req, res) {
+  try {
+    const playlist = await loadMyPlaylist(req);
+    const songId = cleanNumber(req.params.songId, 'Song id');
+    if (!(await model.isSongInPlaylist(playlist.playlist_id, songId))) {
+      throw makeError(404, 'That song is not in this playlist');
+    }
+    await model.removeSongFromPlaylist(playlist.playlist_id, songId);
+    sendSuccess(res, 200, 'Song removed from playlist', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+
+// FAVORITES, DOWNLOADS
+
+
+async function listFavorites(req, res) {
+  try {
+    sendSuccess(res, 200, 'Favorites loaded', await model.getFavorites(req.user.user_id));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function addFavorite(req, res) {
+  try {
+    const songId = cleanNumber(req.body.song_id, 'Song');
+    await loadSong(songId);
+    if (await model.isFavorite(req.user.user_id, songId)) {
+      throw makeError(400, 'That song is already in your favorites');
+    }
+    await model.addFavorite(req.user.user_id, songId);
+    sendSuccess(res, 201, 'Added to favorites', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function removeFavorite(req, res) {
+  try {
+    const songId = cleanNumber(req.params.songId, 'Song id');
+    if (!(await model.isFavorite(req.user.user_id, songId))) {
+      throw makeError(404, 'That song is not in your favorites');
+    }
+    await model.removeFavorite(req.user.user_id, songId);
+    sendSuccess(res, 200, 'Removed from favorites', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function listDownloads(req, res) {
+  try {
+    sendSuccess(res, 200, 'Downloads loaded', await model.getDownloads(req.user.user_id));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function addDownload(req, res) {
+  try {
+    const songId = cleanNumber(req.body.song_id, 'Song');
+    await loadSong(songId);
+    if (await model.isDownloaded(req.user.user_id, songId)) {
+      throw makeError(400, 'That song is already downloaded');
+    }
+    await model.addDownload(req.user.user_id, songId);
+    sendSuccess(res, 201, 'Song downloaded', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function removeDownload(req, res) {
+  try {
+    const download = await model.getDownload(cleanNumber(req.params.id, 'Download id'));
+    if (!download) {
+      throw makeError(404, 'Download not found');
+    }
+    if (download.user_id !== req.user.user_id) {
+      throw makeError(403, 'This download belongs to another user');
+    }
+    await model.removeDownload(download.download_id);
+    sendSuccess(res, 200, 'Download removed', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+// QUEUE AND HISTORY
+
+async function listQueue(req, res) {
+  try {
+    sendSuccess(res, 200, 'Queue loaded', await model.getQueue(req.user.user_id));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function addToQueue(req, res) {
+  try {
+    const songId = cleanNumber(req.body.song_id, 'Song');
+    await loadSong(songId);
+    await model.addToQueue(req.user.user_id, songId);
+    sendSuccess(res, 201, 'Added to queue', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function removeFromQueue(req, res) {
+  try {
+    const item = await model.getQueueItem(cleanNumber(req.params.id, 'Queue id'));
+    if (!item) {
+      throw makeError(404, 'Queue item not found');
+    }
+    if (item.user_id !== req.user.user_id) {
+      throw makeError(403, 'This queue item belongs to another user');
+    }
+    await model.removeFromQueue(item.queue_id);
+    sendSuccess(res, 200, 'Removed from queue', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function clearQueue(req, res) {
+  try {
+    await model.clearQueue(req.user.user_id);
+    sendSuccess(res, 200, 'Queue cleared', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function listHistory(req, res) {
+  try {
+    sendSuccess(res, 200, 'History loaded', await model.getHistory(req.user.user_id));
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function addHistory(req, res) {
+  try {
+    const songId = cleanNumber(req.body.song_id, 'Song');
+    await loadSong(songId);
+    await model.addHistory(req.user.user_id, songId);
+    sendSuccess(res, 201, 'Saved to history', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function clearHistory(req, res) {
+  try {
+    await model.clearHistory(req.user.user_id);
+    sendSuccess(res, 200, 'History cleared', null);
+  } catch (err) {
+    handleError(res, err);
+  }
+}
