@@ -899,3 +899,44 @@ async function deleteComment(req, res) {
     handleError(res, err);
   }
 }
+
+// Morte gwapo
+// REPORTS (the three joins)
+
+async function reportSongs(req, res) {
+  try {
+    sendSuccess(res, 200, 'Report loaded', await model.reportSongs());
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function reportUsersPlaylists(req, res) {
+  try {
+    sendSuccess(res, 200, 'Report loaded', await model.reportUsersPlaylists());
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+async function reportUsersPlaylistsFull(req, res) {
+  try {
+    sendSuccess(res, 200, 'Report loaded', await model.reportUsersPlaylistsFull());
+  } catch (err) {
+    handleError(res, err);
+  }
+}
+
+module.exports = {
+  requireLogin, handleError, sendError,a
+  createAlbum, deleteAlbum,
+  register, login, logout, getMe, updateMe, updateSettings, deleteMe,
+  listArtists, getArtist, createArtist, updateArtist, deleteArtist, listAlbums, createAlbum,
+  listSongs, getSong, listGenres, createSong, uploadSongAudio, streamSongAudio, updateSong, deleteSong,
+  listPlaylists, getPlaylist, createPlaylist, renamePlaylist, deletePlaylist, addSongToPlaylist, removeSongFromPlaylist,
+  listFavorites, addFavorite, removeFavorite, listDownloads, addDownload, removeDownload,
+  listQueue, addToQueue, removeFromQueue, clearQueue, listHistory, addHistory, clearHistory,
+  listRatings, createRating, updateRating, deleteRating,
+  listComments, createComment, updateComment, deleteComment,
+  reportSongs, reportUsersPlaylists, reportUsersPlaylistsFull
+};
