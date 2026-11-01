@@ -90,6 +90,18 @@ textarea { min-height: 88px; resize: vertical; }
 .inline-fields input[type="number"] { width: 100%; }
 
 /* Login */
+#loginScreen {
+  display: grid;
+  min-height: 100vh;
+  align-items: center;
+  padding: 32px 16px;
+  
+  background-image: url('/bg-image/login.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 #loginScreen { display: grid; min-height: 100vh; align-items: center; padding: 32px 16px; }
 .login-box {
   width: min(100%, 420px);
@@ -106,7 +118,7 @@ textarea { min-height: 88px; resize: vertical; }
 .login-box button.primary { width: 100%; margin-top: 8px; }
 .login-box .small-text { margin: 18px 0 0; text-align: center; }
 
-/* App shell */
+/* App design */
 #appScreen { min-height: 100vh; }
 #layout { display: flex; min-height: calc(100vh - 102px); padding-bottom: 102px; }
 #sidebar {
