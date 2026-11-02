@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="Xcuysnk2PvB5kSfEynkF" name="Page-1">
-        <mxGraphModel dx="904" dy="423" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1388" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -50,7 +50,7 @@
                     <mxGeometry height="26" width="200" y="78" as="geometry"/>
                 </mxCell>
                 <mxCell id="JNOZwQWJNhe_Y4bO73AC-16" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=#dae8fc;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;" value="songs" vertex="1">
-                    <mxGeometry height="208" width="210" x="870" y="150" as="geometry"/>
+                    <mxGeometry height="208" width="210" x="870" y="120" as="geometry"/>
                 </mxCell>
                 <mxCell id="JNOZwQWJNhe_Y4bO73AC-17" parent="JNOZwQWJNhe_Y4bO73AC-16" style="text;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#333333;" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;song_id (PK_NN)&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" vertex="1">
                     <mxGeometry height="26" width="210" y="26" as="geometry"/>

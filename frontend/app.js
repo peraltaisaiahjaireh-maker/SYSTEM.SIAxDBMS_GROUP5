@@ -30,6 +30,67 @@ function $(id) {
   return document.getElementById(id);
 }
 
+
+
+/////////////////////////////////////////////
+function makeSeeMoreMenu(items) {
+  let html = '<div class="menu-dropdown">';
+  html += '<button type="button" class="btn-see-more" onclick="toggleSeeMore(event)" title="More options" aria-label="More options" aria-haspopup="true" aria-expanded="false">⋮</button>';
+  html += '<div class="dropdown-content hidden" role="menu">';
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    html += '<button type="button" role="menuitem" class="' + (item.extraClass || '') + '" onclick="closeAllMenus(); ' + item.action + '">' + item.label + '</button>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+function toggleSeeMore(event) {
+  event.stopPropagation();
+  const button = event.currentTarget;
+  const dropdown = button.nextElementSibling;
+  const isHidden = dropdown.classList.contains('hidden');
+  closeAllMenus();
+  if (isHidden) {
+    dropdown.classList.remove('hidden');
+    dropdown.classList.add('is-open');
+    button.parentElement.classList.add('menu-open');
+    button.setAttribute('aria-expanded', 'true');
+
+    const buttonRect = button.getBoundingClientRect();
+    const menuRect = dropdown.getBoundingClientRect();
+    const top = buttonRect.bottom + menuRect.height > window.innerHeight
+      ? Math.max(8, buttonRect.top - menuRect.height)
+      : buttonRect.bottom;
+    const left = Math.max(8, Math.min(buttonRect.right - menuRect.width, window.innerWidth - menuRect.width - 8));
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = left + 'px';
+  }
+}
+
+function closeAllMenus() {
+  const menus = document.querySelectorAll('.dropdown-content');
+  menus.forEach(function (m) {
+    m.classList.add('hidden');
+    m.classList.remove('is-open');
+    m.parentElement.classList.remove('menu-open');
+    m.style.top = '';
+    m.style.left = '';
+    m.previousElementSibling.setAttribute('aria-expanded', 'false');
+  });
+}
+
+document.addEventListener('click', closeAllMenus);
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Escape') {
+    closeAllMenus();
+  }
+});
+window.addEventListener('scroll', closeAllMenus, true);
+window.addEventListener('resize', closeAllMenus);
+
+
+
 function esc(value) {
   return String(value === null || value === undefined ? '' : value)
     .replace(/&/g, '&amp;')
@@ -49,24 +110,63 @@ function makeButton(label, action, extraClass) {
   return '<button type="button" class="' + (extraClass || '') + '" onclick="' + action + '">' + label + '</button>';
 }
 
-function makeTable(headers, rows, emptyText, tableId) {
+const LIST_PAGE_SIZE = 10;
+
+function makeTable(headers, rows, emptyText, tableId, pageSize) {
   if (rows.length === 0) {
     return '<p class="muted">' + esc(emptyText || 'Nothing here yet.') + '</p>';
   }
-  let html = '<div class="table-wrap"><table' + (tableId ? ' id="' + esc(tableId) + '"' : '') + '><tr>';
+  const visibleRows = Math.min(rows.length, pageSize || LIST_PAGE_SIZE);
+  const resolvedTableId = tableId || 'list-table-' + (++tableSequence);
+  let html = '<div class="table-list"><div class="table-wrap"><table id="' + esc(resolvedTableId) +
+    '" data-page-size="' + (pageSize || LIST_PAGE_SIZE) + '" data-visible-rows="' + visibleRows + '"><thead><tr>';
   for (let i = 0; i < headers.length; i++) {
     html += '<th>' + headers[i] + '</th>';
   }
-  html += '</tr>';
+  html += '</tr></thead><tbody>';
   for (let r = 0; r < rows.length; r++) {
-    html += '<tr>';
+    html += '<tr data-list-row data-row-index="' + r + '"' + (r >= visibleRows ? ' hidden' : '') + '>';
     for (let c = 0; c < rows[r].length; c++) {
-      const isButtons = rows[r][c].indexOf('<button') === 0;
+      const isButtons = rows[r][c].indexOf('<button') === 0 || rows[r][c].indexOf('<div class="menu-dropdown">') === 0;
       html += '<td' + (isButtons ? ' class="buttons"' : '') + '>' + rows[r][c] + '</td>';
     }
     html += '</tr>';
   }
-  return html + '</table></div>';
+  html += '</tbody></table></div>';
+  if (rows.length > visibleRows) {
+    html += '<button type="button" class="see-more-rows" aria-controls="' + esc(resolvedTableId) +
+      '" aria-expanded="false" onclick="showMoreRows(this)"><span class="see-more-icon" aria-hidden="true">⌄</span>' +
+      '<span class="see-more-label">See more</span><span class="see-more-count">Show ' + (rows.length - visibleRows) +
+      ' more</span></button>';
+  }
+  return html + '</div>';
+}
+
+let tableSequence = 0;
+
+function showMoreRows(button) {
+  const table = button.parentElement.querySelector('table');
+  const rows = table.querySelectorAll('[data-list-row]');
+  const pageSize = Number(table.dataset.pageSize) || LIST_PAGE_SIZE;
+  const totalRows = rows.length;
+  let visibleRows = Number(table.dataset.visibleRows) || pageSize;
+  const isExpanded = visibleRows >= totalRows;
+
+  visibleRows = isExpanded ? Math.min(pageSize, totalRows) : Math.min(visibleRows + pageSize, totalRows);
+  table.dataset.visibleRows = String(visibleRows);
+  rows.forEach(function (row, index) {
+    row.hidden = table.dataset.searchQuery
+      ? row.textContent.toLowerCase().indexOf(table.dataset.searchQuery) === -1
+      : index >= visibleRows;
+  });
+
+  const expanded = visibleRows >= totalRows;
+  button.setAttribute('aria-expanded', String(expanded));
+  button.querySelector('.see-more-label').textContent = expanded ? 'Show less' : 'See more';
+  button.querySelector('.see-more-icon').textContent = expanded ? '⌃' : '⌄';
+  button.querySelector('.see-more-count').textContent = expanded
+    ? 'Showing all ' + totalRows
+    : 'Show ' + (totalRows - visibleRows) + ' more';
 }
 
 function songLink(songId, title) {
@@ -805,6 +905,9 @@ async function loadSongs() {
   cacheSongs(songs);
   playbackList = songs;
 
+
+
+
   let rows = [];
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
@@ -814,9 +917,19 @@ async function loadSongs() {
       esc(s.album_title),
       s.genres.length > 0 ? esc(s.genres.join(', ')) : '-',
       formatTime(s.duration),
-      makeButton('Play', 'playSong(' + s.song_id + ')')
+      makeSeeMoreMenu([
+        { label: 'Play', action: 'playSong(' + s.song_id + ')' },
+        { label: 'Add to queue', action: 'addToQueue(' + s.song_id + ')' },
+        { label: 'Add to playlist', action: 'addToPlaylist(' + s.song_id + ')' },
+        { label: 'Download', action: 'downloadSong(' + s.song_id + ')' },
+        { label: 'Edit', action: 'editSong(' + s.song_id + ')' },
+        { label: 'Delete', action: 'deleteSong(' + s.song_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
+
+
+
 
   let html = '<div class="library-heading"><div><span class="eyebrow">YOUR COLLECTION</span><h2>Music library</h2><p class="muted">' +
     songs.length + (songs.length === 1 ? ' song ready for your next listening session.' : ' songs ready for your next listening session.') +
@@ -826,10 +939,7 @@ async function loadSongs() {
     html += makeButton('Genre-hop mix', 'startGenreHopMix()');
   }
   html += '</div></div>';
-  html += '<label class="song-search"><span>Find something to play</span><input type="search" placeholder="Search songs, artists, albums or genres" oninput="filterSongs(this.value)"></label>';
-  html += makeTable(['Title', 'Artist', 'Album', 'Genre', 'Length', ''], rows, 'There are no songs yet.', 'songTable');
-
-  html += '<div class="box"><h3>Add a song</h3>';
+  html += '<details class="box add-song-panel"><summary><span>Add a song or upload audio</span><span class="add-song-hint">YouTube link or local audio file</span></summary>';
   if (albums.length === 0) {
     html += '<p class="muted">Add an artist and an album first (Artists and Albums page).</p>';
   } else {
@@ -846,7 +956,9 @@ async function loadSongs() {
     html += '<button type="submit" class="primary">Add song</button>';
     html += '</div></form>';
   }
-  html += '</div>';
+  html += '</details>';
+  html += '<label class="song-search"><span>Find something to play</span><input type="search" placeholder="Search songs, artists, albums or genres" oninput="filterSongs(this.value)"></label>';
+  html += makeTable(['Title', 'Artist', 'Album', 'Genre', 'Length', ''], rows, 'There are no songs yet.', 'songTable');
   return html;
 }
 
@@ -856,9 +968,16 @@ function filterSongs(query) {
     return;
   }
   const search = query.trim().toLowerCase();
-  const rows = table.querySelectorAll('tr');
-  for (let i = 1; i < rows.length; i++) {
-    rows[i].hidden = rows[i].textContent.toLowerCase().indexOf(search) === -1;
+  table.dataset.searchQuery = search;
+  const rows = table.querySelectorAll('[data-list-row]');
+  const visibleRows = Number(table.dataset.visibleRows) || LIST_PAGE_SIZE;
+  rows.forEach(function (row, index) {
+    const matches = row.textContent.toLowerCase().indexOf(search) !== -1;
+    row.hidden = search ? !matches : index >= visibleRows;
+  });
+  const moreButton = table.parentElement.parentElement.querySelector('.see-more-rows');
+  if (moreButton) {
+    moreButton.hidden = Boolean(search);
   }
 }
 
@@ -1172,16 +1291,21 @@ async function loadArtists() {
     artistCache[artists[i].artist_id] = artists[i];
     artistRows.push([
       esc(artists[i].artist_name),
-      makeButton('Rename', 'editArtist(' + artists[i].artist_id + ')') + makeButton('Delete', 'deleteArtist(' + artists[i].artist_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Rename', action: 'editArtist(' + artists[i].artist_id + ')' },
+        { label: 'Delete', action: 'deleteArtist(' + artists[i].artist_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   let albumRows = [];
   for (let i = 0; i < albums.length; i++) {
-    albumCache[albums[i].album_id] = albums[i]; // Make sure albumCache tracks albums
+    albumCache[albums[i].album_id] = albums[i];
     albumRows.push([
       esc(albums[i].album_title),
       esc(albums[i].artist_name),
-      makeButton('Delete', 'deleteAlbum(' + albums[i].album_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Delete', action: 'deleteAlbum(' + albums[i].album_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
 
@@ -1255,10 +1379,12 @@ async function loadPlaylists() {
     const p = playlists[i];
     playlistCache[p.playlist_id] = p;
     rows.push([
-      esc(p.playlist_name),
-      makeButton('Open', 'showPage(\'playlist\', ' + p.playlist_id + ')') +
-      makeButton('Rename', 'renamePlaylist(' + p.playlist_id + ')') +
-      makeButton('Delete', 'deletePlaylist(' + p.playlist_id + ')', 'danger')
+      '<a href="#" onclick="showPage(\'playlist\', ' + p.playlist_id + '); return false;">' + esc(p.playlist_name) + '</a>',
+      makeSeeMoreMenu([
+        { label: 'Open', action: 'showPage(\'playlist\', ' + p.playlist_id + ')' },
+        { label: 'Rename', action: 'renamePlaylist(' + p.playlist_id + ')' },
+        { label: 'Delete', action: 'deletePlaylist(' + p.playlist_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   let html = '<h2>My playlists</h2>';
@@ -1301,7 +1427,12 @@ async function loadPlaylist(playlistId) {
       songLink(s.song_id, s.song_title),
       esc(s.artist_name),
       formatTime(s.duration),
-      makeButton('Play', 'playSong(' + s.song_id + ')') + makeButton('Remove', 'removeFromPlaylist(' + playlistId + ', ' + s.song_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Play', action: 'playSong(' + s.song_id + ')' },
+        { label: 'Add to queue', action: 'addToQueue(' + s.song_id + ')' },
+        { label: 'Add to playlist', action: 'addToPlaylist(' + s.song_id + ')' },
+        { label: 'Remove from playlist', action: 'removeFromPlaylist(' + playlistId + ', ' + s.song_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   let html = '<p><a href="#" onclick="showPage(\'playlists\'); return false;">Back to playlists</a></p>';
@@ -1319,13 +1450,19 @@ async function loadFavorites() {
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
+  //////////////////////////////////////
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
       songLink(s.song_id, s.song_title),
       esc(s.artist_name),
       formatTime(s.duration),
-      makeButton('Play', 'playSong(' + s.song_id + ')') + makeButton('Remove', 'removeFavorite(' + s.song_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Play', action: 'playSong(' + s.song_id + ')' },
+        { label: 'Add to queue', action: 'addToQueue(' + s.song_id + ')' },
+        { label: 'Add to playlist', action: 'addToPlaylist(' + s.song_id + ')' },
+        { label: 'Remove', action: 'removeFavorite(' + s.song_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   return '<h2>Favorites</h2>' + makeTable(['Title', 'Artist', 'Length', ''], rows, 'You have no favorite songs yet.');
@@ -1336,6 +1473,7 @@ async function loadQueue() {
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
+  //////////////////////////////////////
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
@@ -1343,7 +1481,11 @@ async function loadQueue() {
       songLink(s.song_id, s.song_title),
       esc(s.artist_name),
       formatTime(s.duration),
-      makeButton('Play', 'playSong(' + s.song_id + ')') + makeButton('Remove', 'removeFromQueue(' + s.queue_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Play', action: 'playSong(' + s.song_id + ')' },
+        { label: 'Add to playlist', action: 'addToPlaylist(' + s.song_id + ')' },
+        { label: 'Remove', action: 'removeFromQueue(' + s.queue_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   let html = '<h2>Queue</h2>';
@@ -1370,13 +1512,18 @@ async function loadHistory() {
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
+  //////////////////////////////////////
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
       songLink(s.song_id, s.song_title),
       esc(s.artist_name),
       formatTime(s.duration),
-      makeButton('Play again', 'playSong(' + s.song_id + ')')
+      makeSeeMoreMenu([
+        { label: 'Play again', action: 'playSong(' + s.song_id + ')' },
+        { label: 'Add to queue', action: 'addToQueue(' + s.song_id + ')' },
+        { label: 'Add to playlist', action: 'addToPlaylist(' + s.song_id + ')' }
+      ])
     ]);
   }
   let html = '<h2>History</h2><p class="muted">The last 50 songs you played, newest first.</p>';
@@ -1400,13 +1547,18 @@ async function loadDownloads() {
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
+  ///////////////////////////////////
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
       songLink(s.song_id, s.song_title),
       esc(s.artist_name),
       formatTime(s.duration),
-      makeButton('Play', 'playSong(' + s.song_id + ')') + makeButton('Remove', 'removeDownload(' + s.download_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Play', action: 'playSong(' + s.song_id + ')' },
+        { label: 'Add to queue', action: 'addToQueue(' + s.song_id + ')' },
+        { label: 'Remove', action: 'removeDownload(' + s.download_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   return '<h2>Downloads</h2>' + makeTable(['Title', 'Artist', 'Length', ''], rows, 'You have not downloaded any songs yet.');
@@ -1425,7 +1577,10 @@ async function loadRatings() {
       songLink(r.song_id, r.song_title),
       esc(r.artist_name),
       r.score + ' / 5',
-      makeButton('Change', 'changeRating(' + r.rating_id + ', ' + r.score + ')') + makeButton('Remove', 'deleteRating(' + r.rating_id + ')', 'danger')
+      makeSeeMoreMenu([
+        { label: 'Change rating', action: 'changeRating(' + r.rating_id + ', ' + r.score + ')' },
+        { label: 'Remove rating', action: 'deleteRating(' + r.rating_id + ')', extraClass: 'danger' }
+      ])
     ]);
   }
   return '<h2>My ratings</h2>' + makeTable(['Song', 'Artist', 'Rating', ''], rows, 'You have not rated any songs yet. Open a song to rate it.');
@@ -1448,7 +1603,7 @@ async function loadReports() {
   for (let i = 0; i < full.length; i++) {
     fullRows.push([noneText(full[i].username, 'no user'), noneText(full[i].playlist_name, 'no playlist')]);
   }
-/////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////
   let html = '<h2>Reports</h2>';
   html += '<h3>1. INNER JOIN: songs with their artist and album</h3>';
   html += makeTable(['ID', 'Song', 'Artist', 'Album'], songRows);

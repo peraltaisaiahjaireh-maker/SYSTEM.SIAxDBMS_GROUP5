@@ -28,11 +28,11 @@ app.use(function (err, req, res, next) {
   controller.handleError(res, err);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-//CSS bg image path
+//CSS bg image 
 app.use('/bg-image', express.static(path.join(__dirname, '..', 'bg-image')));
-// check the database first, then start 
+// check the database connection, then start 
 db.query('SELECT 1')
   .then(function () {
     app.listen(PORT, function () {

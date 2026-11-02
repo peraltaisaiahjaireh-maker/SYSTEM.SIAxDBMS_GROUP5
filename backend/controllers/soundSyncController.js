@@ -238,6 +238,12 @@ async function loadMe(userId) {
   };
 }
 
+
+
+
+// HARDE JEAMS PALIGSA
+// Account
+
 async function register(req, res) {
   try {
     const username = cleanText(req.body.username, 'Username', 100);
@@ -341,7 +347,7 @@ async function deleteMe(req, res) {
 }
 
 
-// JHERALD SALVA
+// ISAIAH JAIREH S. PERALTA
 
 // ARTISTS AND ALBUMS
 
@@ -428,6 +434,9 @@ async function createAlbum(req, res) {
   }
 }
 
+
+
+//JHERALD SALVA
 // SONGS AND GENRES
 
 async function listSongs(req, res) {
@@ -653,6 +662,7 @@ async function removeSongFromPlaylist(req, res) {
   }
 }
 
+// JADGE ETHAN ROY SIENES
 // FAVORITES, DOWNLOADS
 
 async function listFavorites(req, res) {
@@ -802,7 +812,7 @@ async function clearHistory(req, res) {
   }
 }
 
-//JADGE ETHAN ROY SIENES
+//GJ-CHYLL MORTE
 
 // RATINGS AND COMMENTS
 
@@ -915,7 +925,6 @@ async function deleteComment(req, res) {
   }
 }
 
-//GJ-CHYLL MORTE
 // REPORTS (the three joins)
 
 async function reportSongs(req, res) {

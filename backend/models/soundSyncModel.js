@@ -2,8 +2,8 @@
 const db = require('../config/db');
 
 
-//JHERALD SALVA
-
+//HARDE JEAMS PALIGSA
+//ACCOUNT
 // USERS, PROFILE, SETTINGS
 async function findUserByEmail(email) {
   const [rows] = await db.query('SELECT user_id FROM users WHERE email = ?', [email]);
@@ -71,7 +71,7 @@ async function deleteUser(userId) {
   await db.query('DELETE FROM users WHERE user_id = ?', [userId]);
 }
 
-//GJ-CHYLL MORTE
+//ISAIAH JAIREH S. PERALTA
 //ARTISTS AND ALBUMS
 
 async function getArtists() {
@@ -127,7 +127,7 @@ async function updateAlbum(albumId, title, artistId) {
   await db.query('UPDATE albums SET album_title = ?, artist_id = ? WHERE album_id = ?', [title, artistId, albumId]);
 }*/
 
-//JADGE ETHAN ROY SIENES
+//JHERALD SALVA
 // SONGS AND GENRES
 
 // JOIN 1 (INNER JOIN): songs together with their artist and album names
@@ -261,6 +261,7 @@ async function removeSongFromPlaylist(playlistId, songId) {
   await db.query('DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?', [playlistId, songId]);
 }
 
+// JADGE ETHAN ROY SIENES
 // FAVORITES, DOWNLOADS, QUEUE, HISTORY (each one is a list of songs per user
 
 async function getFavorites(userId) {
@@ -382,7 +383,7 @@ async function clearHistory(userId) {
 }
 
 
-//ISAIAH JAIREH S. PERALTA
+//GJ-CHYLL MORTE
 
 // RATINGS AND COMMENTS
 
