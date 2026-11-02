@@ -16,7 +16,6 @@ async function createUser(username, email, password) {
     [username, email, password]
   );
   const userId = result.insertId;
-  // every new user also gets a profile row and a settings row
   await db.query("INSERT INTO profile (user_id, bio) VALUES (?, '')", [userId]);
   await db.query('INSERT INTO settings (user_id) VALUES (?)', [userId]);
   return userId;
@@ -322,7 +321,7 @@ async function removeDownload(downloadId) {
 }
 ///////////////////////////////////////////////////////
 async function deleteAlbum(albumId) {
-  // delete the album's songs first, then delete the album
+  // delete the album
   const [songs] = await db.query('SELECT song_id FROM songs WHERE album_id = ?', [albumId]);
   for (let i = 0; i < songs.length; i++) {
     await deleteSong(songs[i].song_id);
@@ -458,7 +457,7 @@ async function deleteComment(commentId) {
 
 // REPORTS (the three joins)
 
-// JOIN 1: INNER JOIN. Songs with their artist and album names.
+// JOIN 1: INNER JOIN.
 async function reportSongs() {
   const [rows] = await db.query(
     `SELECT songs.song_id, songs.title AS song_title, artists.artist_name, albums.album_title
@@ -469,7 +468,7 @@ async function reportSongs() {
   return rows;
 }
 
-// JOIN 2: LEFT JOIN. All users and their playlists (users with 0 playlists are included).
+// JOIN 2: LEFT JOIN. 
 async function reportUsersPlaylists() {
   const [rows] = await db.query(
     `SELECT users.username, playlists.playlist_name
@@ -480,7 +479,7 @@ async function reportUsersPlaylists() {
 }
 
 // JOIN 3: FULL OUTER JOIN.
-// LEFT JOIN and a RIGHT JOIN combined with UNION. This shows everything from both sides.
+// LEFT JOIN and a RIGHT JOIN combined with UNION
 async function reportUsersPlaylistsFull() {
   const [rows] = await db.query(
     `SELECT users.username, playlists.playlist_name
