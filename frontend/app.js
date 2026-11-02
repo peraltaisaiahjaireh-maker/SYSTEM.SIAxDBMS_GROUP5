@@ -1,4 +1,4 @@
-// SoundSync frontend. Plain JavaScript that talks to the REST API with fetch.
+// talks to the REST API.
 
 let token = localStorage.getItem('token');
 let currentUser = null;

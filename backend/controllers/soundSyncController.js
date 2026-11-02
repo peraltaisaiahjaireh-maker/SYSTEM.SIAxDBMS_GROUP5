@@ -1,5 +1,5 @@
 //ISAIAH JAIREH S. PERALTA
-// CONTROLLER: receives the request, checks the input, calls the model, sends the response.
+// receives the request, checks the input, calls the model, sends the response.
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -43,7 +43,6 @@ function handleError(res, err) {
 
 //input checking 
 
-// required text with a maximum length
 function cleanText(value, name, maxLength) {
   if (typeof value !== 'string' || value.trim() === '') {
     throw makeError(400, name + ' is required');
@@ -55,7 +54,7 @@ function cleanText(value, name, maxLength) {
   return text;
 }
 
-// whole number that is 1 or more (used for ids, duration, ...)
+// whole number that is 1 or more
 function cleanNumber(value, name) {
   const number = Number(value);
   if (value === '' || value === null || value === undefined || !Number.isInteger(number) || number < 1) {
@@ -64,7 +63,7 @@ function cleanNumber(value, name) {
   return number;
 }
 
-// a number that may be left empty (returns null when empty)
+// a number that may be left empty
 function cleanOptionalNumber(value, name) {
   if (value === '' || value === null || value === undefined) {
     return null;
@@ -72,7 +71,7 @@ function cleanOptionalNumber(value, name) {
   return cleanNumber(value, name);
 }
 
-// rating score: 1 to 5
+// rating score 1 to 5
 function cleanScore(value) {
   const score = Number(value);
   if (value === '' || value === null || value === undefined || !Number.isInteger(score) || score < 1 || score > 5) {
@@ -124,7 +123,6 @@ function extractYouTubeId(url) {
   return videoId;
 }
 
-// ----- loading things that must exist -----
 
 async function loadSong(songId) {
   const song = await model.getSong(songId);
@@ -134,7 +132,6 @@ async function loadSong(songId) {
   return song;
 }
 
-// the playlist must exist and belong to the logged-in user
 async function loadMyPlaylist(req) {
   const playlistId = cleanNumber(req.params.id, 'Playlist id');
   const playlist = await model.getPlaylist(playlistId);
@@ -146,8 +143,6 @@ async function loadMyPlaylist(req) {
   }
   return playlist;
 }
-
-
 
 ////////////////////////////////////////////////////
 // delete album
@@ -167,7 +162,7 @@ async function deleteAlbum(req, res) {
     handleError(res, err);
   }
 }
-// adds a "genres" list and a "genre_id" to each song
+// adds a genres
 async function addGenresToSongs(songs) {
   const genreRows = await model.getAllSongGenres();
   for (let i = 0; i < songs.length; i++) {
@@ -185,7 +180,7 @@ async function addGenresToSongs(songs) {
   return songs;
 }
 
-// reads and checks the song fields from the request body
+// reads and checks
 async function readSongBody(body) {
   const song = {
     title: cleanText(body.title, 'Title', 100),
@@ -220,7 +215,7 @@ function requireLogin(req, res, next) {
   next();
 }
 
-// ACCOUNT: users, profile, settings
+// ACCOUNT
 
 async function loadMe(userId) {
   const user = await model.getUser(userId);
@@ -237,9 +232,6 @@ async function loadMe(userId) {
     theme: settings ? settings.theme : 'dark'
   };
 }
-
-
-
 
 // HARDE JEAMS PALIGSA
 // Account

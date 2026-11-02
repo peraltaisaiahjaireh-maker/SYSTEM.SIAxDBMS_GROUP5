@@ -1,4 +1,4 @@
-// starts the web server. It serves the API and the frontend files.
+// serves the API and the frontend files.
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
@@ -11,7 +11,7 @@ const app = express();
 
 app.use(express.json());
 
-// the API
+// API
 app.use('/api', apiRoutes);
 app.use('/api', function (req, res) {
   controller.sendError(res, 404, 'That API address does not exist');
@@ -20,7 +20,7 @@ app.use('/api', function (req, res) {
 // the frontend 
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// last stop for errors
+// for errors
 app.use(function (err, req, res, next) {
   if (err.type === 'entity.parse.failed') {
     return controller.sendError(res, 400, 'The request body is not valid JSON');
@@ -32,7 +32,7 @@ const PORT = process.env.PORT || 5000;
 
 //CSS bg image 
 app.use('/bg-image', express.static(path.join(__dirname, '..', 'bg-image')));
-// check the database connection, then start 
+// checks the database connection, then start 
 db.query('SELECT 1')
   .then(function () {
     app.listen(PORT, function () {
