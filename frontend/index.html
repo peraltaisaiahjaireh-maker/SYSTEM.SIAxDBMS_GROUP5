@@ -12,7 +12,7 @@
 
   <div id="loading" class="hidden">Loading...</div>
 
-  <!-- LOGIN / CREATE ACCOUNT -->
+  <!-- LOGIN and CREATE ACCOUNT -->
   <div id="loginScreen" class="hidden">
     <div class="login-box">
       <h1>SoundSync</h1>
@@ -40,7 +40,7 @@
     </div>
   </div>
 
-  <!-- THE APP -->
+  <!-- THE MAIN User Interface -->
   <div id="appScreen" class="hidden">
     <div id="layout">
       <aside id="sidebar">
@@ -60,7 +60,7 @@
       <div id="contentWrap">
         <header id="topbar">
           <div class="topbar-copy">
-            <span class="eyebrow">YOUR PERSONAL MUSIC SPACE</span>
+            <span class="eyebrow">WHERE YOUR MUSIC SHINES AND YOU DISCOVER NEW SONGS FROM DIFFERENT ARTISTS</span>
             <span id="userInfo"></span>
           </div>
           <button type="button" class="logout-button" onclick="doLogout()">Log out <span aria-hidden="true">↗</span></button>
@@ -102,7 +102,6 @@
     </footer>
   </div>
 
-  <!-- popup form used for adding / editing -->
   <dialog id="dialog">
     <form id="dialogForm"></form>
   </dialog>

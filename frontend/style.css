@@ -219,6 +219,7 @@ textarea {
   background-position: center;
   background-repeat: no-repeat;
 }
+
 /*
 #loginScreen {
   display: grid;
@@ -227,6 +228,7 @@ textarea {
   padding: 32px 16px;
 }
 */
+
 .login-box {
   width: min(100%, 420px);
   margin: auto;
@@ -262,7 +264,7 @@ textarea {
   text-align: center;
 }
 
-/* App design */
+/* App shell */
 #appScreen {
   min-height: 100vh;
 }
@@ -528,6 +530,54 @@ textarea {
   flex: 0 0 auto;
 }
 
+.add-song-panel {
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+.add-song-panel summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.add-song-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.add-song-panel summary::after {
+  color: var(--accent);
+  content: "+";
+  font-size: 20px;
+  line-height: 1;
+}
+
+.add-song-panel[open] summary::after {
+  content: "−";
+}
+
+.add-song-hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.add-song-panel form {
+  padding: 4px 16px 16px;
+}
+
+.add-song-panel form label {
+  flex: 1 1 190px;
+}
+
 .song-search {
   display: block;
   max-width: 520px;
@@ -595,8 +645,9 @@ td {
 }
 
 td.buttons {
-  min-width: 175px;
+  min-width: 64px;
   white-space: nowrap;
+  text-align: right;
 }
 
 td.buttons button {
@@ -605,9 +656,55 @@ td.buttons button {
   font-size: 12px;
 }
 
+#page>.table-list,
 #page>.table-wrap,
 #page>.muted {
   margin-bottom: 20px;
+}
+
+.see-more-rows {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.see-more-rows:hover {
+  background: var(--panel-raised);
+  transform: none;
+}
+
+.see-more-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--panel-raised);
+  color: var(--text);
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.see-more-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.see-more-count {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 #page>h3 {
@@ -657,6 +754,70 @@ td.buttons button {
 #dialog label textarea {
   max-width: none;
 }
+
+
+
+/* Context Menu / Dropdown Menu */
+.menu-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-see-more {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.dropdown-content {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+  display: grid;
+  min-width: 150px;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.dropdown-content.is-open {
+  position: fixed;
+  right: auto;
+  top: 0;
+  left: 0;
+  max-height: min(70vh, 360px);
+  overflow-y: auto;
+}
+
+.menu-dropdown.menu-open {
+  z-index: 101;
+}
+
+.dropdown-content button {
+  width: 100%;
+  margin: 0;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  text-align: left;
+}
+
+.dropdown-content button:hover {
+  background: var(--panel-raised);
+  transform: none;
+}
+
+
+
+
 
 /* Playback bar */
 #player {
@@ -876,6 +1037,14 @@ td.buttons button {
 }
 
 @media (max-width: 640px) {
+  .add-song-panel summary {
+    flex-wrap: wrap;
+  }
+
+  .add-song-hint {
+    margin-left: 0;
+  }
+
   #layout {
     display: block;
     padding-bottom: 135px;

@@ -5,6 +5,7 @@ const controller = require("../controllers/soundSyncController");
 const router = express.Router();
 const login = controller.requireLogin; // routes with login need a logged-in user
 
+//HARDE JEAMS PALIGSA
 // Account
 router.post("/users", controller.register);
 router.post("/login", controller.login);
@@ -14,6 +15,7 @@ router.put("/users/me", login, controller.updateMe);
 router.delete("/users/me", login, controller.deleteMe);
 router.put("/settings", login, controller.updateSettings);
 
+//ISAIAH JAIREH S. PERALTA
 // Artists and albums
 router.get("/artists", login, controller.listArtists);
 router.get("/artists/:id", login, controller.getArtist);
@@ -24,6 +26,7 @@ router.delete("/albums/:id", login, controller.deleteAlbum);
 router.get("/albums", login, controller.listAlbums);
 router.post("/albums", login, controller.createAlbum);
 
+//JHERALD SALVA
 // Songs and genres
 router.get("/songs", login, controller.listSongs);
 router.get("/songs/:id/audio", login, controller.streamSongAudio);
@@ -34,6 +37,7 @@ router.put("/songs/:id", login, controller.updateSong);
 router.delete("/songs/:id", login, controller.deleteSong);
 router.get("/genres", login, controller.listGenres);
 
+//ANTHONY SUPERIO
 // Playlists
 router.get("/playlists", login, controller.listPlaylists);
 router.get("/playlists/:id", login, controller.getPlaylist);
@@ -43,6 +47,7 @@ router.delete("/playlists/:id", login, controller.deletePlaylist);
 router.post("/playlists/:id/songs", login, controller.addSongToPlaylist);
 router.delete("/playlists/:id/songs/:songId", login, controller.removeSongFromPlaylist);
 
+// JADGE ETHAN ROY SIENES
 // Favorites and downloads
 router.get("/favorites", login, controller.listFavorites);
 router.post("/favorites", login, controller.addFavorite);
@@ -60,6 +65,7 @@ router.get("/history", login, controller.listHistory);
 router.post("/history", login, controller.addHistory);
 router.delete("/history", login, controller.clearHistory);
 
+//GJ-CHYLL MORTE
 //Ratings and comments
 router.get("/ratings", login, controller.listRatings);
 router.post("/ratings", login, controller.createRating);
