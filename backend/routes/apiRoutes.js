@@ -1,84 +1,84 @@
-// ROUTES: connects each URL and method to a controller function.
-const express = require("express");
-const controller = require("../controllers/soundSyncController");
+// connects each URL and method to a controller function.
+const express = require('express');
+const accountController = require('../controllers/accountController');
+const artistsController = require('../controllers/artistsController');
+const songsController = require('../controllers/songsController');
+const playlistsController = require('../controllers/playlistsController');
+const libraryController = require('../controllers/libraryController');
+const ratingsController = require('../controllers/ratingsController');
+const { requireLogin } = require('../controllers/helpers');
 
 const router = express.Router();
-const login = controller.requireLogin; // routes with login need a logged-in user
+const login = requireLogin; // logged-in user
 
-//HARDE JEAMS PALIGSA
-// Account
-router.post("/users", controller.register);
-router.post("/login", controller.login);
-router.post("/logout", login, controller.logout);
-router.get("/users/me", login, controller.getMe);
-router.put("/users/me", login, controller.updateMe);
-router.delete("/users/me", login, controller.deleteMe);
-router.put("/settings", login, controller.updateSettings);
+// Account (Harde Jeams Paligsa)
+router.post('/users', accountController.register);
+router.post('/login', accountController.login);
+router.post('/logout', login, accountController.logout);
+router.get('/users/me', login, accountController.getMe);
+router.put('/users/me', login, accountController.updateMe);
+router.delete('/users/me', login, accountController.deleteMe);
+router.put('/settings', login, accountController.updateSettings);
 
-//ISAIAH JAIREH S. PERALTA
-// Artists and albums
-router.get("/artists", login, controller.listArtists);
-router.get("/artists/:id", login, controller.getArtist);
-router.post("/artists", login, controller.createArtist);
-router.put("/artists/:id", login, controller.updateArtist);
-router.delete("/artists/:id", login, controller.deleteArtist);
-router.delete("/albums/:id", login, controller.deleteAlbum);
-router.get("/albums", login, controller.listAlbums);
-router.post("/albums", login, controller.createAlbum);
+// Artists and albums (Isaiah Jaireh S. Peralta)
+router.get('/artists', login, artistsController.listArtists);
+router.get('/artists/:id', login, artistsController.getArtist);
+router.post('/artists', login, artistsController.createArtist);
+router.put('/artists/:id', login, artistsController.updateArtist);
+router.delete('/artists/:id', login, artistsController.deleteArtist);
+router.delete('/albums/:id', login, artistsController.deleteAlbum);
+router.get('/albums', login, artistsController.listAlbums);
+router.post('/albums', login, artistsController.createAlbum);
 
-//JHERALD SALVA
-// Songs and genres
-router.get("/songs", login, controller.listSongs);
-router.get("/songs/:id/audio", login, controller.streamSongAudio);
-router.get("/songs/:id", login, controller.getSong);
-router.post("/songs", login, controller.createSong);
-router.put("/songs/:id/audio", login, express.raw({ type: "*/*", limit: "50mb" }), controller.uploadSongAudio);
-router.put("/songs/:id", login, controller.updateSong);
-router.delete("/songs/:id", login, controller.deleteSong);
-router.get("/genres", login, controller.listGenres);
+// Songs and genres (Jherald Salva)
+router.get('/songs', login, songsController.listSongs);
+router.get('/songs/:id/audio', login, songsController.streamSongAudio);
+router.get('/songs/:id', login, songsController.getSong);
+router.post('/songs', login, songsController.createSong);
+router.put('/songs/:id/audio', login, express.raw({ type: '*/*', limit: '50mb' }), songsController.uploadSongAudio);
+router.put('/songs/:id', login, songsController.updateSong);
+router.delete('/songs/:id', login, songsController.deleteSong);
+router.get('/genres', login, songsController.listGenres);
 
-//ANTHONY SUPERIO
-// Playlists
-router.get("/playlists", login, controller.listPlaylists);
-router.get("/playlists/:id", login, controller.getPlaylist);
-router.post("/playlists", login, controller.createPlaylist);
-router.put("/playlists/:id", login, controller.renamePlaylist);
-router.delete("/playlists/:id", login, controller.deletePlaylist);
-router.post("/playlists/:id/songs", login, controller.addSongToPlaylist);
-router.delete("/playlists/:id/songs/:songId", login, controller.removeSongFromPlaylist);
+// Playlists (Anthony Superio)
+router.get('/playlists', login, playlistsController.listPlaylists);
+router.get('/playlists/:id', login, playlistsController.getPlaylist);
+router.post('/playlists', login, playlistsController.createPlaylist);
+router.put('/playlists/:id', login, playlistsController.renamePlaylist);
+router.delete('/playlists/:id', login, playlistsController.deletePlaylist);
+router.post('/playlists/:id/songs', login, playlistsController.addSongToPlaylist);
+router.delete('/playlists/:id/songs/:songId', login, playlistsController.removeSongFromPlaylist);
 
-// JADGE ETHAN ROY SIENES
-// Favorites and downloads
-router.get("/favorites", login, controller.listFavorites);
-router.post("/favorites", login, controller.addFavorite);
-router.delete("/favorites/:songId", login, controller.removeFavorite);
-router.get("/downloads", login, controller.listDownloads);
-router.post("/downloads", login, controller.addDownload);
-router.delete("/downloads/:id", login, controller.removeDownload);
+// Favorites and downloads (Jadge Ethan Roy Sienes)
+router.get('/favorites', login, libraryController.listFavorites);
+router.post('/favorites', login, libraryController.addFavorite);
+router.delete('/favorites/:songId', login, libraryController.removeFavorite);
+router.get('/downloads', login, libraryController.listDownloads);
+router.post('/downloads', login, libraryController.addDownload);
+router.delete('/downloads/:id', login, libraryController.removeDownload);
 
-//Queue and history
-router.get("/queue", login, controller.listQueue);
-router.post("/queue", login, controller.addToQueue);
-router.delete("/queue", login, controller.clearQueue);
-router.delete("/queue/:id", login, controller.removeFromQueue);
-router.get("/history", login, controller.listHistory);
-router.post("/history", login, controller.addHistory);
-router.delete("/history", login, controller.clearHistory);
+//Queue and history (Jadge Ethan Roy Sienes)
+router.get('/queue', login, libraryController.listQueue);
+router.post('/queue', login, libraryController.addToQueue);
+router.delete('/queue', login, libraryController.clearQueue);
+router.delete('/queue/:id', login, libraryController.removeFromQueue);
+router.get('/history', login, libraryController.listHistory);
+router.post('/history', login, libraryController.addHistory);
+router.delete('/history', login, libraryController.clearHistory);
 
-//GJ-CHYLL MORTE
-//Ratings and comments
-router.get("/ratings", login, controller.listRatings);
-router.post("/ratings", login, controller.createRating);
-router.put("/ratings/:id", login, controller.updateRating);
-router.delete("/ratings/:id", login, controller.deleteRating);
-router.get("/songs/:id/comments", login, controller.listComments);
-router.post("/songs/:id/comments", login, controller.createComment);
-router.put("/comments/:id", login, controller.updateComment);
-router.delete("/comments/:id", login, controller.deleteComment);
+//Ratings and comments (GJ-Chyll Morte)
+router.get('/ratings', login, ratingsController.listRatings);
+router.post('/ratings', login, ratingsController.createRating);
+router.put('/ratings/:id', login, ratingsController.updateRating);
+router.delete('/ratings/:id', login, ratingsController.deleteRating);
+router.get('/songs/:id/comments', login, ratingsController.listComments);
+router.post('/songs/:id/comments', login, ratingsController.createComment);
+router.put('/comments/:id', login, ratingsController.updateComment);
+router.delete('/comments/:id', login, ratingsController.deleteComment);
 
-//the three joins
-router.get("/reports/songs", login, controller.reportSongs); // INNER JOIN
-router.get("/reports/users-playlists", login, controller.reportUsersPlaylists); // LEFT JOIN
-router.get("/reports/users-playlists-full", login, controller.reportUsersPlaylistsFull); // FULL OUTER JOIN
+//the three joins (GJ-Chyll Morte)
+router.get('/reports/songs', login, songsController.reportSongs); // INNER JOIN
+router.get('/reports/users-playlists', login, playlistsController.reportUsersPlaylists); // LEFT JOIN
+router.get('/reports/users-playlists-full', login, playlistsController.reportUsersPlaylistsFull); // FULL OUTER JOIN
 
 module.exports = router;

@@ -3,6 +3,8 @@
 
 SoundSync’s standout feature is its unified music player: it can play both uploaded audio files and YouTube tracks, while keeping them in the same personal library and playback experience. It also brings playlists, favorites, queue, and listening history together for each user. You can see this in the PLAYER INTERFACE and PLAYBACK LOGIC.
 
+## List of Members
+```
 Group Leader:
 Peralta, Isaiah Jaireh S. 
 Members:
@@ -11,6 +13,7 @@ Morte, GJ-Chyll
 Salva, Jherald
 Superio, Anthony
 Sienes, Jadge Ethan Roy
+```
 
 ## Project Structure
 ```text
