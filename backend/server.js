@@ -19,6 +19,8 @@ app.use('/api', function (req, res) {
 
 // frontend 
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
+//CSS bg image 
+app.use('/bg-image', express.static(path.join(__dirname, '..', 'bg-image')));
 
 // errors
 app.use(function (err, req, res, next) {
@@ -28,7 +30,7 @@ app.use(function (err, req, res, next) {
   handleError(res, err);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // check the database first
 db.query('SELECT 1')
