@@ -1,3 +1,5 @@
+/*
+
 //ISAIAH JAIREH S. PERALTA
 // receives the request, checks the input, calls the model, sends the response.
 const crypto = require('crypto');
@@ -956,3 +958,6 @@ module.exports = {
   listComments, createComment, updateComment, deleteComment,
   reportSongs, reportUsersPlaylists, reportUsersPlaylistsFull
 };
+
+
+*/ 

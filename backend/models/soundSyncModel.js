@@ -1,3 +1,4 @@
+/*
 // this file talks to the MySQL database. All SQL queries are here.
 const db = require('../config/db');
 
@@ -57,8 +58,6 @@ async function updateTheme(userId, theme) {
 }
 
 async function deleteUser(userId) {
-  // The foreign keys do not allow deleting a user who still has data,
-  // so the user's rows in the other tables are deleted first.
   await db.query(
     'DELETE FROM playlist_songs WHERE playlist_id IN (SELECT playlist_id FROM playlists WHERE user_id = ?)',
     [userId]
@@ -121,10 +120,10 @@ async function createAlbum(title, artistId) {
   const [result] = await db.query('INSERT INTO albums (album_title, artist_id) VALUES (?, ?)', [title, artistId]);
   return result.insertId;
 }
-/*
-async function updateAlbum(albumId, title, artistId) {
-  await db.query('UPDATE albums SET album_title = ?, artist_id = ? WHERE album_id = ?', [title, artistId, albumId]);
-}*/
+
+//async function updateAlbum(albumId, title, artistId) {
+//  await db.query('UPDATE albums SET album_title = ?, artist_id = ? WHERE album_id = ?', [title, artistId, albumId]);
+//}
 
 //JHERALD SALVA
 // SONGS AND GENRES
@@ -512,3 +511,4 @@ module.exports = {
   getComments, getComment, createComment, updateComment, deleteComment,
   reportSongs, reportUsersPlaylists, reportUsersPlaylistsFull
 };
+*/ 
