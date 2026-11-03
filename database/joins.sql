@@ -5,7 +5,7 @@ FROM albums
 INNER JOIN artists ON albums.artist_id = artists.artist_id
 ORDER BY albums.album_title
 
---PERALTA
+--SALVA
 --SONG_QUERY
 SELECT songs.song_id, songs.title AS song_title, songs.artist_id, songs.album_id,
          artists.artist_name, albums.album_title, songs.duration, songs.youtube_id, songs.audio_path
@@ -13,7 +13,7 @@ FROM songs
 INNER JOIN artists ON songs.artist_id = artists.artist_id
 INNER JOIN albums ON songs.album_id = albums.album_id
 
---SUPERIO
+--SALVA
 --getAllSongGenres
 SELECT song_genres.song_id, genres.genre_id, genres.genre_name
 FROM song_genres
@@ -28,7 +28,7 @@ INNER JOIN artists ON songs.artist_id = artists.artist_id
 WHERE playlist_songs.playlist_id = ?
 ORDER BY songs.title
 
---SALVA
+--SIENES
 --getFavorites
 SELECT songs.song_id, songs.title AS song_title, artists.artist_name, songs.duration
 FROM favorites
@@ -37,7 +37,7 @@ INNER JOIN artists ON songs.artist_id = artists.artist_id
 WHERE favorites.user_id = ?
 ORDER BY favorites.favorite_id DESC
 
---SALVA
+--SIENES
 --getDownloads
 SELECT downloads.download_id, songs.song_id, songs.title AS song_title, artists.artist_name, songs.duration
 FROM downloads
@@ -82,7 +82,7 @@ INNER JOIN users ON comments.user_id = users.user_id
 WHERE comments.song_id = ?
 ORDER BY comments.comment_id
 
---PERALTA
+--SALVA
 --reportSongs
 --INNER JOIN
 

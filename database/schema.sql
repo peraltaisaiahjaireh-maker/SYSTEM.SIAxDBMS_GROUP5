@@ -1,3 +1,10 @@
+-- PERALTA users, settings, profile
+-- PALIGSA artists, albums
+-- SALVA   songs, genres, song_genres
+-- SUPERIO playlists, playlist_songs
+-- SIENES  favorites, downloads, queue, history
+-- MORTE   ratings, comments
+
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
