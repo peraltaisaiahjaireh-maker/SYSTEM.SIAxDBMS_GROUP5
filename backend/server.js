@@ -36,12 +36,12 @@ const PORT = process.env.PORT || 5000;
 db.query('SELECT 1')
   .then(function () {
     app.listen(PORT, function () {
-      console.log('SoundSync is running. Open http://localhost:' + PORT);
+      console.log('SoundSync is running on http://localhost:' + PORT);
     });
   })
   .catch(function (err) {
     console.error('Could not connect to MySQL: ' + err.message);
-    console.error('Check DB_USER and DB_PASSWORD in the .env file, and that you ran database/schema.sql and database/data.sql.');
+    console.error('Check DB_USER and DB_PASSWORD in the .env file, and that you run database/schema.sql and include other data that are need to be inserted (genres).');
     process.exit(1);
   });
 

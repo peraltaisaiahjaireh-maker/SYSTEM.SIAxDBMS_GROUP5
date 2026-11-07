@@ -1,5 +1,6 @@
-// talks to the REST API.
-
+// ISAIAH JAIREH S. PERALTA
+//  CORE
+// // talks to the REST API.
 let token = localStorage.getItem('token');
 let currentUser = null;
 let currentPage = 'songs';
@@ -7,11 +8,9 @@ let currentArg = null;
 let pageTurn = 0;
 let loadingCount = 0;
 let messageTimer = null;
-
 let songCache = {};
 let albumCache = {};
 let commentCache = {};
-
 let playingSong = null;
 let playSeconds = 0;
 let playTimer = null;
@@ -25,14 +24,11 @@ let playbackList = [];
 let isPlaying = false;
 let playbackRequest = 0;
 let pendingYouTubeSongId = null;
-
+// HELPER FUNCTIONS
 function $(id) {
   return document.getElementById(id);
 }
-
-
-
-/////////////////////////////////////////////
+// DROPDOWN PARA SA MENU
 function makeSeeMoreMenu(items) {
   let html = '<div class="menu-dropdown">';
   html += '<button type="button" class="btn-see-more" onclick="toggleSeeMore(event)" title="More options" aria-label="More options" aria-haspopup="true" aria-expanded="false">⋮</button>';
@@ -89,8 +85,7 @@ document.addEventListener('keydown', function (event) {
 window.addEventListener('scroll', closeAllMenus, true);
 window.addEventListener('resize', closeAllMenus);
 
-
-
+// esc formatTime and make button
 function esc(value) {
   return String(value === null || value === undefined ? '' : value)
     .replace(/&/g, '&amp;')
@@ -169,6 +164,7 @@ function showMoreRows(button) {
     : 'Show ' + (totalRows - visibleRows) + ' more';
 }
 
+// SONG LINK AND NONE TEXT and cacheSongs
 function songLink(songId, title) {
   return '<a href="#" onclick="openSong(' + songId + '); return false;">' + esc(title) + '</a>';
 }
@@ -183,6 +179,7 @@ function cacheSongs(list) {
   }
 }
 
+//where apply show message and clear message and apply the theme
 function showMessage(text, isError) {
   const box = $('message');
   box.textContent = text;
@@ -202,7 +199,8 @@ function clearMessage() {
 function applyTheme(theme) {
   document.body.className = theme === 'dark' ? 'dark' : '';
 }
-
+//////////////////////////////////////////////////////////////////////////////////////
+// YOUTUBE PLAYER
 function onYouTubeIframeAPIReady() {
   if (ytPlayer || !window.YT || !window.YT.Player) {
     return;
@@ -245,7 +243,8 @@ function onYouTubeIframeAPIReady() {
     }
   });
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////////
+// YOUTUBE API LOADING
 function loadYouTubeAPI() {
   window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
   const script = document.createElement('script');
@@ -330,7 +329,9 @@ localAudio.addEventListener('error', function () {
     showMessage('This local audio file could not be played. Try another supported audio format.', true);
   }
 });
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// request
 async function request(method, url, body) {
   loadingCount++;
   $('loading').classList.remove('hidden');
@@ -368,7 +369,8 @@ async function request(method, url, body) {
     }
   }
 }
-///////////////////////////////////////////////////////////////////////////////////////////
+
+// where runAction
 async function runAction(work, successText, after) {
   try {
     await work();
@@ -383,6 +385,7 @@ async function runAction(work, successText, after) {
   }
 }
 
+// LOGIN AND REGISTER or login screen
 function showLoginScreen(errorText) {
   token = null;
   currentUser = null;
@@ -405,7 +408,8 @@ function showRegister(show) {
   $('loginError').textContent = '';
   $('registerError').textContent = '';
 }
-//////////////////////////////////////////////////////////////////////////////////////
+
+//Ang menu array
 async function doLogin(event) {
   event.preventDefault();
   $('loginError').textContent = '';
@@ -422,7 +426,8 @@ async function doLogin(event) {
     $('loginError').textContent = err.message;
   }
 }
-/////////////////////////////////////////////////////////////////////////////////////////////
+
+// where you open/ refresh the page and open a song
 async function doRegister(event) {
   event.preventDefault();
   $('registerError').textContent = '';
@@ -459,6 +464,7 @@ async function startApp() {
   await showPage('songs');
 }
 
+//the menu array
 const MENU = [
   ['songs', 'Songs'],
   ['artists', 'Artists and Albums'],
@@ -480,6 +486,8 @@ function buildMenu() {
   $('menu').innerHTML = html;
 }
 
+//ISAIAH JAIREH S. PERALTA
+//OBJECT OR SET OF ARRAY LOADERS
 const LOADERS = {
   songs: loadSongs,
   song: loadSong,
@@ -494,7 +502,8 @@ const LOADERS = {
   reports: loadReports,
   profile: loadProfile
 };
-/////////////////////////////////////////////////////////////////////////////////////
+
+// -showpage -refreshPage -openSong
 async function showPage(page, arg) {
   currentPage = page;
   currentArg = arg === undefined ? null : arg;
@@ -530,6 +539,7 @@ function openSong(songId) {
   showPage('song', songId);
 }
 
+// -openForm -closeForm -readDuration
 function openForm(title, fields, onSave) {
   let html = '<h3>' + esc(title) + '</h3>';
   for (let i = 0; i < fields.length; i++) {
@@ -600,7 +610,8 @@ function readDuration(minutes, seconds) {
   }
   return m * 60 + s;
 }
-////////////////////////////////////////////////////////////////////////////////
+
+// KUNG ASA ANG PLAYER CONTROLS YOUTUBE SECTION NI
 async function playSong(songId) {
   const requestId = ++playbackRequest;
   pendingYouTubeSongId = null;
@@ -625,7 +636,7 @@ async function playSong(songId) {
     showMessage('This song has no audio source yet. Edit it to add a YouTube link or upload an audio file.', true);
     return;
   }
-
+  // YOUTUBE IDENTIFIER FOR DEVELOPERS CODE
   if (!song.audio_path && !/^[\w-]{11}$/.test(song.youtube_id)) {
     showMessage('This song has an invalid YouTube video ID. Edit the song and check its source.', true);
     return;
@@ -778,6 +789,7 @@ function seekSong(value) {
   }
 }
 
+// FUNCTION WERE ANG VOLUME MA CONTROL SULOD SYSTEM
 function setPlayerVolume(value) {
   localAudio.volume = Number(value) / 100;
   if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
@@ -806,6 +818,7 @@ function playAdjacentSong(offset) {
   playSong(playbackList[nextIndex].song_id);
 }
 
+// THE MAJOR FEATURE OF OUR SYSTEM
 function startGenreHopMix() {
   const buckets = {};
   const untaggedKey = 'No genre';
@@ -897,16 +910,15 @@ function stopSong() {
   isPlaying = false;
   updatePlayer();
 }
-////////////////////////////////////////////////////////////////////////////////////////////////
+
+// JHERALD SALVA
+// LOAD SONGS INTO THE LIBRARY
 async function loadSongs() {
   const songs = await request('GET', '/songs');
   const albums = await request('GET', '/albums');
   const genres = await request('GET', '/genres');
   cacheSongs(songs);
   playbackList = songs;
-
-
-
 
   let rows = [];
   for (let i = 0; i < songs.length; i++) {
@@ -927,9 +939,6 @@ async function loadSongs() {
       ])
     ]);
   }
-
-
-
 
   let html = '<div class="library-heading"><div><span class="eyebrow">YOUR COLLECTION</span><h2>Music library</h2><p class="muted">' +
     songs.length + (songs.length === 1 ? ' song ready for your next listening session.' : ' songs ready for your next listening session.') +
@@ -1035,7 +1044,7 @@ function submitSong(event) {
     }
   }, 'Song added', refreshPage);
 }
-///////////////////////////////////////////////////////////////////////////////////////
+
 async function requestAudioUpload(songId, file) {
   loadingCount++;
   $('loading').classList.remove('hidden');
@@ -1074,7 +1083,8 @@ async function requestAudioUpload(songId, file) {
     }
   }
 }
-///////////////////////////////////////////////////////////////////////////////////////////
+
+
 async function loadSong(songId) {
   const song = await request('GET', '/songs/' + songId);
   const comments = await request('GET', '/songs/' + songId + '/comments');
@@ -1146,6 +1156,8 @@ async function loadSong(songId) {
   return html;
 }
 
+
+// JADGE ETHAN ROY SIENES
 function addToQueue(songId) {
   runAction(function () { return request('POST', '/queue', { song_id: songId }); }, 'Added to queue');
 }
@@ -1161,7 +1173,9 @@ function removeFavorite(songId) {
 function downloadSong(songId) {
   runAction(function () { return request('POST', '/downloads', { song_id: songId }); }, 'Song downloaded', refreshPage);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// ANTHONY SUPERIO
 async function addToPlaylist(songId) {
   try {
     const playlists = await request('GET', '/playlists');
@@ -1181,7 +1195,8 @@ async function addToPlaylist(songId) {
     showMessage(err.message, true);
   }
 }
-///////////////////////////////////////////////////////////////////////////////////////
+
+//JHERALD SALVA
 async function editSong(songId) {
   try {
     const song = await request('GET', '/songs/' + songId);
@@ -1235,6 +1250,7 @@ function deleteSong(songId) {
   runAction(function () { return request('DELETE', '/songs/' + songId); }, 'Song deleted', function () { return showPage('songs'); });
 }
 
+// GJ-CHYLL MORTE
 function rateSong(songId) {
   const score = $('ratingSelect').value;
   runAction(function () { return request('POST', '/ratings', { song_id: songId, score: score }); }, 'Rating saved', refreshPage);
@@ -1279,7 +1295,8 @@ function deleteComment(commentId) {
   }
   runAction(function () { return request('DELETE', '/comments/' + commentId); }, 'Comment deleted', refreshPage);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ISAIAH JAIREH S. PERALTA
 let artistCache = {};
 
 async function loadArtists() {
@@ -1346,7 +1363,7 @@ function submitAlbum(event) {
   const body = { album_title: form.elements.album_title.value, artist_id: form.elements.artist_id.value };
   runAction(function () { return request('POST', '/albums', body); }, 'Album added', refreshPage);
 }
-////////////////////////////////////////////////////////////////
+
 function deleteAlbum(albumId) {
   const title = albumCache[albumId] ? albumCache[albumId].album_title : 'this album';
   if (!confirm('Delete "' + title + '"? Its songs will be deleted too.')) {
@@ -1369,7 +1386,10 @@ function deleteArtist(artistId) {
   }
   runAction(function () { return request('DELETE', '/artists/' + artistId); }, 'Artist deleted', refreshPage);
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// ANTHONY SUPERIO
+// PLAYLISTS
 let playlistCache = {};
 
 async function loadPlaylists() {
@@ -1415,7 +1435,7 @@ function deletePlaylist(playlistId) {
   }
   runAction(function () { return request('DELETE', '/playlists/' + playlistId); }, 'Playlist deleted', function () { return showPage('playlists'); });
 }
-///////////////////////////////////////////////////////////////////////////////////////
+
 async function loadPlaylist(playlistId) {
   const playlist = await request('GET', '/playlists/' + playlistId);
   cacheSongs(playlist.songs);
@@ -1444,13 +1464,14 @@ async function loadPlaylist(playlistId) {
 function removeFromPlaylist(playlistId, songId) {
   runAction(function () { return request('DELETE', '/playlists/' + playlistId + '/songs/' + songId); }, 'Song removed from playlist', refreshPage);
 }
-//////////////////////////////////////////////////////////////////////////////////
+
+// JADGE ETHAN ROY SIENES
 async function loadFavorites() {
   const songs = await request('GET', '/favorites');
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
-  //////////////////////////////////////
+  //
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
@@ -1467,13 +1488,13 @@ async function loadFavorites() {
   }
   return '<h2>Favorites</h2>' + makeTable(['Title', 'Artist', 'Length', ''], rows, 'You have no favorite songs yet.');
 }
-/////////////////////////////////////////////////////////////////////////////////////////////
+
 async function loadQueue() {
   const songs = await request('GET', '/queue');
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
-  //////////////////////////////////////
+  //
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
@@ -1506,13 +1527,13 @@ function clearQueue() {
   }
   runAction(function () { return request('DELETE', '/queue'); }, 'Queue cleared', refreshPage);
 }
-//////////////////////////////////////////////////////////////////////////////////////////////
+
 async function loadHistory() {
   const songs = await request('GET', '/history');
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
-  //////////////////////////////////////
+  //
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
@@ -1541,13 +1562,12 @@ function clearHistory() {
   runAction(function () { return request('DELETE', '/history'); }, 'History cleared', refreshPage);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
 async function loadDownloads() {
   const songs = await request('GET', '/downloads');
   cacheSongs(songs);
   playbackList = songs;
   let rows = [];
-  ///////////////////////////////////
+  //
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
     rows.push([
@@ -1567,7 +1587,9 @@ async function loadDownloads() {
 function removeDownload(downloadId) {
   runAction(function () { return request('DELETE', '/downloads/' + downloadId); }, 'Download removed', refreshPage);
 }
-///////////////////////////////////////////////////////////////////////////////////////////
+
+
+// GJ-CHYLL MORTE
 async function loadRatings() {
   const ratings = await request('GET', '/ratings');
   let rows = [];
@@ -1585,7 +1607,9 @@ async function loadRatings() {
   }
   return '<h2>My ratings</h2>' + makeTable(['Song', 'Artist', 'Rating', ''], rows, 'You have not rated any songs yet. Open a song to rate it.');
 }
-////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 async function loadReports() {
   const songs = await request('GET', '/reports/songs');
   const left = await request('GET', '/reports/users-playlists');
@@ -1649,7 +1673,7 @@ function saveProfile(event) {
     $('userInfo').textContent = 'Logged in as ' + currentUser.username;
   }, 'Profile saved');
 }
-////////////////////////////////////////////////////////////////////////////////
+
 function saveTheme(event) {
   event.preventDefault();
   const theme = event.target.elements.theme.value;
@@ -1658,7 +1682,7 @@ function saveTheme(event) {
     applyTheme(currentUser.theme);
   }, 'Settings saved');
 }
-//////////////////////////////////////////////////////////////////////////////////
+
 function deleteAccount() {
   if (!confirm('Delete your account permanently? This cannot be undone.')) {
     return;
