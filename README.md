@@ -24,17 +24,17 @@ Sienes, Jadge Ethan Roy
 ## Project Structure
 ```text
 SOUNDSYNC/
-├── .gitignore
-├── .env
-├── .env.example
-├── soundSync.drawio
-├── README.md
-├── package.json
-├── index.js
-├── backend/
-│   ├── config/
-│   │   └── db.js
-│   ├── models/
+|-- .gitignore
+|-- .env
+|-- .env.example
+|-- soundSync.drawio
+|-- README.md
+|-- package.json
+|-- index.js
+|-- backend/
+│   |-- config/
+│   │   |--- db.js
+│   |-- models/
 |   |   |---accountController.js
 |   |   |---artistController.js
 |   |   |---helpers.js
@@ -42,27 +42,27 @@ SOUNDSYNC/
 |   |   |---playlistsController.js
 |   |   |---ratingsController.js
 |   |   |---songsController.js
-│   │   └── soundSyncModel.js
-│   ├── controllers/
+│   │   |--- soundSyncModel.js
+│   |-- controllers/
 |   |   |---accountModel.js
 |   |   |---artistsModel.js
 |   |   |---libraryModel.js
 |   |   |---playlistsModel.js
 |   |   |---ratingsModel.js
 |   |   |---songsModel.js
-│   │   └── soundSyncController.js
-│   ├── routes/
-│   │   └── apiRoutes.js
-│   └── server.js
-├── frontend/
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
-├── database/
-|   ├── insert.sql
-│   ├── schema.sql
-│   └── data.sql
-└── bg-image/
+│   │   |--- soundSyncController.js
+│   |-- routes/
+│   │   |--- apiRoutes.js
+│   |-- server.js
+|-- frontend/
+│   |-- index.html
+│   |-- style.css
+│   |-- app.js
+|-- database/
+|   |-- insert.sql
+│   |-- schema.sql
+│   |-- data.sql
+|-- bg-image/
 ```
 
 | Member | Github username | Tables | Endpoints/Screens | Join report(s) and join type | Feature role |
@@ -70,7 +70,7 @@ SOUNDSYNC/
 | Peralta | peraltaisaiahjaireh-maker peralta0721 | artist and albums | /artists, /artists/:id, /albums/:id and /albums | INNER JOIN albums, songs and reportSongs(songs) |Full backend build and fixer, Full frontend control, build and fixer HTML CSS JavaScript, Full database control (Local database MySQL), Repository owner, Group leader, debugger, code structure idea, all responsibilities are mine|
 | Morte | Yuzuu021 Chyllpogi · he/him | ratings and comments | /ratings, /ratings/:id, /songs/:id/comments, /comments/:id, /reports/songs, /reports/users-playlists and /reports/users-playlists-full | INNER JOIN ratings and comments | Controllers and Models Contribution with Database Queries and Tables, server.js and also Frontend HTML CSS JavaScript |
 | Salva | salvajherald131-eng jheraldd01 | songs, genres and song_genres | /songs, /songs/:id/audio, /songs/:id, /songs, and /genres | INNER JOIN favorites and downloads | Controllers and Models Contribution with Database Tables, Database Flow Chart Maker and Frontend JavaScript |
-| Paligsa | hardejeamspaligsa-dot | users, profiles and settings | /users, /login, /logout, /users/me and /settings | LEFT JOIN reportUsersPlaylist(users) and FULL OUTER JOIN reportPlaylistFull(users) | Controllers and Models Contribution with Database Queries, Tables fixer and Frontend JavaScript |
+| Paligsa | hardejeamspaligsa-dot | users, profiles and settings | /users, /login, /logout, /users/me and /settings | LEFT JOIN reportUsersPlaylist(users) and FULL OUTER JOIN reportPlaylistFull(users) | Controllers and Models Contribution with Master Database Queries, Tables fixer and Frontend JavaScript |
 | Superio | anthonysuperio4 | playlists and playlist_songs | /playlists, playlist/:id, /playlist/:id/songs and /playlists/:id/songs/:songId | INNER JOIN song_genres and playlist_songs | Controllers and Models Contribution with Database Tables and Frontend JavaScript|
 | Sienes | jadgeethansienes | favorites, downloads, queue and history | /favorites, /favorites/:songId, /downloads, /downloads/:id, /queue, /queue/:id, /history | INNER JOIN queue and history | Controllers and Model Contribution with Database Tables and Frontend JavaScript|
 
@@ -90,8 +90,12 @@ SUGGESTED SPLIT
 2. Set-up MySQL local database
    -CREATE DATABASE soundSync;
    -USE soundsync
-   -Then paste all the table queries from the file schema.sql
-   -On .env and config/db.js set-up your connections to MySQL database
+   -Then paste all the table queries from the file /database/schema.sql
+   -On .env and /config/db.js set-up your connections to MySQL database
 3. npm install
-4. npm start 
+4. npm start/npm run start
+
+NEED TO INSTALL
+-WEB DEV EXTENTIONS
+-GIT
 ```
