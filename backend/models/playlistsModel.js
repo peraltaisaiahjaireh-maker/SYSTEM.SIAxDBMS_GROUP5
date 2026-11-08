@@ -74,6 +74,23 @@ async function reportUsersPlaylists() {
 // JOIN 3: FULL OUTER JOIN 
 async function reportUsersPlaylistsFull() {
   const [rows] = await db.query(
+    `SELECT songs.title, genres.genre_name
+     FROM songs
+     LEFT JOIN song_genres ON songs.song_id = song_genres.song_id
+     LEFT JOIN genres ON song_genres.genre_id = genres.genre_id
+
+     UNION
+
+     SELECT songs.title, genres.genre_name
+     FROM songs
+     RIGHT JOIN song_genres ON songs.song_id = song_genres.song_id
+     RIGHT JOIN genres ON song_genres.genre_id = genres.genre_id`
+  );
+  return rows;
+}
+/*
+async function reportUsersPlaylistsFull() {
+  const [rows] = await db.query(
     `SELECT users.username, playlists.playlist_name
      FROM users
      LEFT JOIN playlists ON users.user_id = playlists.user_id
@@ -86,6 +103,7 @@ async function reportUsersPlaylistsFull() {
   );
   return rows;
 }
+*/
 
 module.exports = {
   getPlaylists, getPlaylist, getPlaylistSongs, createPlaylist, renamePlaylist, deletePlaylist,
