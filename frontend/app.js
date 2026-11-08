@@ -199,7 +199,8 @@ function clearMessage() {
 function applyTheme(theme) {
   document.body.className = theme === 'dark' ? 'dark' : '';
 }
-//////////////////////////////////////////////////////////////////////////////////////
+
+
 // YOUTUBE PLAYER
 function onYouTubeIframeAPIReady() {
   if (ytPlayer || !window.YT || !window.YT.Player) {
@@ -243,7 +244,7 @@ function onYouTubeIframeAPIReady() {
     }
   });
 }
-/////////////////////////////////////////////////////////////////////////////////////////////
+
 // YOUTUBE API LOADING
 function loadYouTubeAPI() {
   window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
