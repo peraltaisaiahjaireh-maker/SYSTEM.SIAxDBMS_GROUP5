@@ -87,7 +87,7 @@ async function reportUsersPlaylistsFull() {
   return rows;
 }
 
-module.exports ={
+module.exports = {
   getPlaylists, getPlaylist, getPlaylistSongs, createPlaylist, renamePlaylist, deletePlaylist,
   isSongInPlaylist, addSongToPlaylist, removeSongFromPlaylist,
   reportUsersPlaylists, reportUsersPlaylistsFull

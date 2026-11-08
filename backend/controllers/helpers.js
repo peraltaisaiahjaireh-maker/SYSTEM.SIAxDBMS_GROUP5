@@ -1,3 +1,4 @@
+// ISAIAH JAIREH S. PERALTA
 // shared helpers used by every controller file
 const crypto = require('crypto');
 const fs = require('fs');
