@@ -137,3 +137,11 @@ INSERT INTO profile (user_id, bio) VALUES
 (1, 'Tracking the Billboard PH Top 25 daily.'),
 (2, 'Unwinding to local coffee house covers and classic acoustics.'),
 (3, 'Festival chaser, electronic soundscapes only.');
+
+-- comments
+INSERT INTO comments (comment_id, user_id, song_id, comment_text) VALUES 
+(701, 1, 610, 'Simon Cowell was wrong, this rock arrangement is sheer genius.'),
+(702, 2, 607, 'The 80s synth production on this album is immaculate.'),
+(703, 3, 609, 'This track deserved all its record-breaking chart run milestones!'),
+(704, 4, 608, 'Such a heavy, beautiful local rock release.'),
+(705, 5, 606, 'The lyrics of this track hit right in the chest.');
