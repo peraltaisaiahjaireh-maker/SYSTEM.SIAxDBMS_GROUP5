@@ -91,6 +91,8 @@ SOUNDSYNC/
    -CREATE DATABASE soundSync;
    -USE soundsync
    -Then paste all the table queries from the file /database/schema.sql
+   -Also paste the genre data insert queries from insert.sql (Only the (--7 genres) this is for default inputs)
+   -add file and name it .env (Use the reference from .env.example)
    -On .env and /config/db.js set-up your connections to MySQL database
 3. npm install
 4. npm start/npm run start
@@ -101,4 +103,9 @@ NEED TO INSTALL
 -GIT
 -MYSQL (COMMAND LINE CLIENT 0R WORKBENCH (MUST HAVE AT LEAST 1 OF THIS MYSQL TOOLS) )
 -.drawio (FOR FLOW CHART DATABASE TABLES VSCODE_EXTENSIONS)
+```
+
+## My attendance checking per member (SpreedSheet)
+```
+https://docs.google.com/spreadsheets/d/1zuETq0kWIjtRhXhYhnpYZzag4OmcPYLptCJ21FFMBj4/edit?usp=sharing
 ```

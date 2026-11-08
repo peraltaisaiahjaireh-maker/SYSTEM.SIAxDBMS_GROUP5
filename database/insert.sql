@@ -48,11 +48,17 @@ INSERT INTO songs (song_id, title, artist_id, album_id, duration, youtube_id, au
 
 -- 7. genres
 INSERT INTO genres (genre_id, genre_name) VALUES 
+(50, 'No Genre'),
 (100, 'OPM Indie'),
 (300, 'Synth-Pop'),
 (200, 'OPM Rock Ballad'),
 (400, 'Pop Rock'),
-(500, 'Alternative Rock');
+(500, 'Alternative Rock'),
+(600, 'Pop'),
+(700, 'Rock'),
+(800, 'Jazz'),
+(900, 'Hip-hop'),
+(1000, 'Electronic');
 
 -- 8. song_genres
 INSERT INTO song_genres (song_id, genre_id) VALUES 

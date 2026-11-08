@@ -1626,7 +1626,7 @@ async function loadReports() {
   }
   let fullRows = [];
   for (let i = 0; i < full.length; i++) {
-    fullRows.push([noneText(full[i].username, 'no user'), noneText(full[i].playlist_name, 'no playlist')]);
+    fullRows.push([noneText(full[i].title, 'no song'), noneText(full[i].genre_name, 'no genre')]);
   }
   /////////////////////////////////////////////////////////////////////////////////////
   let html = '<h2>Reports</h2>';
@@ -1635,7 +1635,7 @@ async function loadReports() {
   html += '<h3>2. LEFT JOIN: all users and their playlists (users with no playlist are included)</h3>';
   html += makeTable(['User', 'Playlist'], leftRows);
   html += '<h3>3. FULL OUTER JOIN: everything from both sides (LEFT JOIN combined with RIGHT JOIN using UNION)</h3>';
-  html += makeTable(['User', 'Playlist'], fullRows);
+  html += makeTable(['Song', 'Genre'], fullRows);
   return html;
 }
 
