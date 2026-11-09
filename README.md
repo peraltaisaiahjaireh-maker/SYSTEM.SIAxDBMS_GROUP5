@@ -23,6 +23,7 @@ Sienes, Jadge Ethan Roy
 
 ## Project Structure
 ```text
+MVC
 SOUNDSYNC/
 |-- .gitignore
 |-- .env
@@ -67,21 +68,23 @@ SOUNDSYNC/
 
 | Member | Github username | Tables | Endpoints/Screens | Join report(s) and join type | Feature role |
 | :--- | :---: | :---: | :---: | :---: | ---: |
-| Peralta, Isaiah Jaireh S. | peraltaisaiahjaireh-maker peralta0721 | artist and albums | /artists, /artists/:id, /albums/:id and /albums | INNER JOIN albums, songs and reportSongs(songs) |Full backend build, idea and fixer, Full frontend main build and fixer HTML CSS JavaScript, Full database control (Local database MySQL), Repository owner, Group leader, Debugger, Code file structure idea, All responsibilities are mine|
-| Morte, GJ-Chyll | Yuzuu021 Chyllpogi · he/him | ratings and comments | /ratings, /ratings/:id, /songs/:id/comments, /comments/:id, /reports/songs, /reports/users-playlists and /reports/users-playlists-full | INNER JOIN ratings and comments | Controllers and Models Contribution with Database Queries and Tables, server.js and also Frontend HTML CSS JavaScript |
-| Salva, Jherald | salvajherald131-eng jheraldd01 | songs, genres and song_genres | /songs, /songs/:id/audio, /songs/:id, /songs, and /genres | INNER JOIN favorites and downloads | Controllers and Models Contribution with Database Tables, Database Flow Chart Maker and Frontend JavaScript |
-| Paligsa, Harde Jeams | hardejeamspaligsa-dot | users, profiles and settings | /users, /login, /logout, /users/me and /settings | LEFT JOIN reportUsersPlaylist(users) and FULL OUTER JOIN reportPlaylistFull(users) | Controllers and Models Contribution with Master Database Queries, Tables fixer and Frontend JavaScript |
-| Superio, Anthony | anthonysuperio4 | playlists and playlist_songs | /playlists, playlist/:id, /playlist/:id/songs and /playlists/:id/songs/:songId | INNER JOIN song_genres and playlist_songs | Controllers and Models Contribution with Database Tables and Frontend JavaScript|
-| Sienes, Jadge Ethan Roy | jadgeethansienes | favorites, downloads, queue and history | /favorites, /favorites/:songId, /downloads, /downloads/:id, /queue, /queue/:id, /history | INNER JOIN queue and history | Controllers and Model Contribution with Database Tables and Frontend JavaScript|
+| Peralta, Isaiah Jaireh S. | peraltaisaiahjaireh-maker `peralta0721` | `artist`, `albums` | `/artists`, `/artists/:id`, `/albums/:id`, `/albums` - `ARTISTS` | (1) INNER JOIN `Album and Artist Report` |Serves as Partial full-Stack Lead and Project Manager, overseeing system architecture, frontend and backend structure idea, MySQL database administration, repository management, artistsController.js/helper.js/artistsModel.js and code syntax fixer.|
+| Morte, GJ-Chyll | Yuzuu021 Chyllpogi · he/him | `ratings` `comments` | `/ratings`, `/ratings/:id`, `/songs/:id/comments`, `/comments/:id`, `/reports/songs`, `/reports/users-playlists` `/reports/users-playlists-full` `RATINGS` | (2) INNER JOIN `Song Ratings Report` `Song comments Report` | Partial full-Stack Lead (server.js, MVC ratingsController.js/ratingsModel.js, database queries, and HTML/CSS/JS frontend) |
+| Salva, Jherald | salvajherald131-eng `jheraldd01` | `songs`, `genres` `song_genres` | `/songs`, `/songs/:id/audio`, `/songs/:id`, `/songs`, `/genres` `SONGS` | (3) INNER JOIN `Song Detail Report` `Song Genre Report` `Users Playlists Reports` | Partial Full-Stack Developer & Data Modeler (songsController.js, songsModels.js, Database Tables/Flowcharts, Frontend JS) |
+| Paligsa, Harde Jeams | hardejeamspaligsa-dot | `users`, `profiles` `settings` | `/users`, `/login`, `/logout`, `/users/me` `/settings` | (1) LEFT JOIN and (1) FULL OUTER JOIN `User Playlists Report` `Song Genre Audit`| Partial Full-Stack Lead (accountController.js, accountModel.js, Master DB Queries/Tables, Frontend JS) |
+| Superio, Anthony | anthonysuperio4 | `playlists` `playlist_songs` | `/playlists`, `playlist/:id`, `/playlist/:id/songs` `/playlists/:id/songs/:songId` | (1) INNER JOIN `Playlist Songs Report` | Partial Full-Stack Developer (Backend Controllers & Models, Database Tables, Frontend JS) |
+| Sienes, Jadge Ethan Roy | jadgeethansienes | `favorites`, `downloads`, `queue` `history` | `/favorites`, `/favorites/:songId`, `/downloads`, `/downloads/:id, /queue`, `/queue/:id, /history` | (4) INNER JOIN `Favorite Songs Report` `Downloaded Songs Report` `Queue Report` `Play History Report` | Partial Full-Stack Lead: MVC Controllers & Models, Database Tables, Frontend JavaScript |
+
+`Partial Full-Stack Developer: Used informally to describe handling both frontend and backend tasks without taking full ownership of the overall system architecture.`
 
 ## SUGGESTED SPLIT
 | AREA | WHAT IT COVERS | NAMES |
 |---|---|---|
 | Core | Users, roles, login, shared layout, database set-up | Peralta |
-| Master data | Lookup and reference tables (categories, branches, statuses) | Paligsa |
-| Transactions | The central business records (orders, bookings, request) | Salva |
-| Unique feature | The rules and logic behind your major feature | Superio |
-| Reports | Join-based reports, summaries, dashboards | Morte |
+| Master data | Lookup and reference tables (categories, branches, statuses) | Paligsa, Morte, Salva |
+| Transactions | The central business records (orders, bookings, request) | Salva, Morte |
+| Unique feature | The rules and logic behind your major feature | Superio, Peralta |
+| Reports | Join-based reports, summaries, dashboards | Morte, Peralta |
 | Audit | Activity log, status history, alerts | Sienes |
 
 ## How to run our System
