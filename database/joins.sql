@@ -1,5 +1,5 @@
 --PERALTA
---getAlbums
+--getAlbums and artists
 SELECT albums.album_id, albums.album_title, albums.artist_id, artists.artist_name
 FROM albums
 INNER JOIN artists ON albums.artist_id = artists.artist_id

@@ -1,5 +1,5 @@
--- PERALTA users, settings, profile
--- PALIGSA artists, albums
+-- PERALTA artists, albums
+-- PALIGSA users, settings, profile
 -- SALVA   songs, genres, song_genres
 -- SUPERIO playlists, playlist_songs
 -- SIENES  favorites, downloads, queue, history
