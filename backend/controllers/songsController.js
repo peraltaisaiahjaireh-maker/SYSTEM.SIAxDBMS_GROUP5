@@ -94,22 +94,34 @@ async function uploadSongAudio(req, res) {
     if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
       throw makeError(400, 'Choose an audio file to upload');
     }
+    const rawFilename = req.headers['x-audio-filename'] || '';
+    let filename = '';
 
-    let filename;
     try {
-      filename = decodeURIComponent(req.headers['x-audio-filename'] || '');
+      filename = decodeURIComponent(rawFilename);
     } catch (err) {
       throw makeError(400, 'The audio filename is invalid');
     }
-    const extension = path.extname(filename).toLowerCase();
+
+    const safeFilename = path.basename(filename);
+    if (!safeFilename || safeFilename !== filename || safeFilename.includes('..')) {
+      throw makeError(400, 'The audio filename is invalid');
+    }
+
+    const extension = path.extname(safeFilename).toLowerCase();
     if (!AUDIO_EXTENSIONS.includes(extension)) {
       throw makeError(400, 'Choose an MP3, M4A, AAC, OGG, WAV, FLAC, or MP4 audio file');
     }
+
     const contentType = req.headers['content-type'] || '';
-    if (!contentType.startsWith('audio/') && contentType !== 'application/octet-stream' &&
-      !(contentType === 'video/mp4' && extension === '.mp4')) {
+    if (
+      !contentType.startsWith('audio/') &&
+      contentType !== 'application/octet-stream' &&
+      !(contentType === 'video/mp4' && extension === '.mp4')
+    ) {
       throw makeError(400, 'The uploaded file is not a supported audio type');
     }
+
 
     const storedName = crypto.randomBytes(16).toString('hex') + extension;
     uploadedPath = path.join(uploadsDir, storedName);

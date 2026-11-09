@@ -8,7 +8,8 @@ const songsModel = require('../models/songsModel');
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 const AUDIO_EXTENSIONS = ['.mp3', '.m4a', '.aac', '.ogg', '.wav', '.flac', '.mp4'];
 
-const sessions = {};
+/////////////////////////////////////////////////////
+const sessions = new Map();
 
 // RESPONSE 
 
@@ -79,7 +80,7 @@ function cleanScore(value) {
 function cleanEmail(value) {
   const email = cleanText(value, 'Email', 100).toLowerCase();
   if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
-    throw makeError(400, 'Email is not valid');
+    throw makeError(400, 'Email invalid');
   }
   return email;
 }
@@ -97,7 +98,7 @@ function extractYouTubeId(url) {
   try {
     parsed = new URL(value);
   } catch (err) {
-    throw makeError(400, 'Enter a valid YouTube link or 11-character video ID');
+    throw makeError(400, 'Enter a valid YouTube link');
   }
   const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
   let videoId = null;
@@ -114,7 +115,7 @@ function extractYouTubeId(url) {
     }
   }
   if (!videoId || !/^[\w-]{11}$/.test(videoId)) {
-    throw makeError(400, 'Enter a valid YouTube link or 11-character video ID');
+    throw makeError(400, 'Enter a valid YouTube link');
   }
   return videoId;
 }
@@ -142,7 +143,32 @@ function removeStoredAudio(audioPath) {
 }
 
 // LOGIN CHECK
+function requireLogin(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : null;
 
+  if (!token) {
+    return sendError(res, 401, 'Please log in first');
+  }
+
+  const session = sessions.get(token);
+
+  if (!session) {
+    return sendError(res, 401, 'Session expired or invalid. Please log in again.');
+  }
+
+  if (session.expiresAt <= Date.now()) {
+    sessions.delete(token);
+    return sendError(res, 401, 'Session expired. Please log in again.');
+  }
+
+  req.token = token;
+  req.user = { user_id: session.user_id, username: session.username };
+  next();
+}
+/*
 function requireLogin(req, res, next) {
   const token = req.headers.authorization;
   if (!token || !sessions[token]) {
@@ -152,7 +178,7 @@ function requireLogin(req, res, next) {
   req.user = sessions[token];
   next();
 }
-
+*/
 module.exports = {
   crypto, fs, path, uploadsDir, AUDIO_EXTENSIONS, sessions,
   sendSuccess, sendError, makeError, handleError,
