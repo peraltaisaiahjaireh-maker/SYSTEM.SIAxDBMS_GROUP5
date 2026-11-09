@@ -8,7 +8,7 @@
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL
 );
 
@@ -50,8 +50,8 @@ CREATE TABLE playlist_songs (
     song_id INT NOT NULL,
 
     PRIMARY KEY (playlist_id, song_id),
-    FOREIGN KEY (playlist_id) REFERENCES playlists(playlist_id),
-    FOREIGN KEY (song_id) REFERENCES songs(song_id)
+    FOREIGN KEY (playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs(song_id) ON DELETE CASCADE
 );
 
 CREATE TABLE favorites (

@@ -103,10 +103,14 @@ LEFT JOIN playlists ON users.user_id = playlists.user_id
 --reportUsersPlaylistsFull
 --FULL OUTER JOIN
 
-SELECT users.username, playlists.playlist_name
-FROM users
-LEFT JOIN playlists ON users.user_id = playlists.user_id
+SELECT songs.title, genres.genre_name
+FROM songs
+LEFT JOIN song_genres ON songs.song_id = song_genres.song_id
+LEFT JOIN genres ON song_genres.genre_id = genres.genre_id
+
 UNION
-SELECT users.username, playlists.playlist_name
-FROM users
-RIGHT JOIN playlists ON users.user_id = playlists.user_id
+
+SELECT songs.title, genres.genre_name
+FROM songs
+RIGHT JOIN song_genres ON songs.song_id = song_genres.song_id
+RIGHT JOIN genres ON song_genres.genre_id = genres.genre_id

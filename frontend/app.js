@@ -2,6 +2,19 @@
 //  CORE
 // // talks to the REST API.
 let token = localStorage.getItem('token');
+
+function clearSession() {
+  localStorage.removeItem('token');
+  token = null;
+  currentUser = null;
+}
+
+function setSession(newToken, user) {
+  token = newToken;
+  currentUser = user;
+  localStorage.setItem('token', newToken);
+}
+
 let currentUser = null;
 let currentPage = 'songs';
 let currentArg = null;
@@ -231,7 +244,7 @@ function onYouTubeIframeAPIReady() {
         playTimer = null;
         updatePlayer();
         const messages = {
-          2: 'The saved YouTube video ID is invalid. Edit the song and paste a full YouTube link or 11-character video ID.',
+          2: 'The saved YouTube video ID is invalid. Edit the song and paste a full YouTube link.',
           5: 'YouTube could not decode this video in the browser. Try a different video.',
           100: 'This YouTube video was removed, made private, or the video ID is incorrect.',
           101: 'This YouTube video does not allow playback in embedded players. Try another video or upload the audio file.',
@@ -339,7 +352,7 @@ async function request(method, url, body) {
   try {
     const options = { method: method, headers: { 'Content-Type': 'application/json' } };
     if (token) {
-      options.headers['Authorization'] = token;
+      options.headers['Authorization'] = 'Bearer ' + token;
     }
     if (body !== undefined) {
       options.body = JSON.stringify(body);
@@ -388,9 +401,7 @@ async function runAction(work, successText, after) {
 
 // LOGIN AND REGISTER or login screen
 function showLoginScreen(errorText) {
-  token = null;
-  currentUser = null;
-  localStorage.removeItem('token');
+  clearSession();
   stopSong();
   applyTheme('light');
   $('appScreen').classList.add('hidden');
@@ -410,7 +421,6 @@ function showRegister(show) {
   $('registerError').textContent = '';
 }
 
-//Ang menu array
 async function doLogin(event) {
   event.preventDefault();
   $('loginError').textContent = '';
@@ -419,8 +429,7 @@ async function doLogin(event) {
       email: $('loginEmail').value,
       password: $('loginPassword').value
     });
-    token = data.token;
-    localStorage.setItem('token', token);
+    setSession(data.token, null);
     $('loginPassword').value = '';
     await startApp();
   } catch (err) {
@@ -488,7 +497,7 @@ function buildMenu() {
 }
 
 //ISAIAH JAIREH S. PERALTA
-//OBJECT OR SET OF ARRAY LOADERS
+//OBJECT OR SET OF ARRAYs
 const LOADERS = {
   songs: loadSongs,
   song: loadSong,
@@ -612,6 +621,69 @@ function readDuration(minutes, seconds) {
   return m * 60 + s;
 }
 
+const audioDurationCache = new WeakMap();
+
+function getAudioDuration(file) {
+  const cachedDuration = audioDurationCache.get(file);
+  if (cachedDuration) {
+    return cachedDuration;
+  }
+
+  const durationPromise = new Promise(function (resolve, reject) {
+    const objectUrl = URL.createObjectURL(file);
+    const audio = new Audio();
+
+    function cleanup() {
+      URL.revokeObjectURL(objectUrl);
+      audio.removeAttribute('src');
+    }
+
+    audio.preload = 'metadata';
+
+    audio.onloadedmetadata = function () {
+      const seconds = Math.round(audio.duration);
+      cleanup();
+
+      if (!Number.isFinite(seconds) || seconds < 1) {
+        reject(new Error('Could not detect the audio duration.'));
+        return;
+      }
+      if (seconds > 36000) {
+        reject(new Error('Audio length must be 10 hours or less.'));
+        return;
+      }
+      resolve(seconds);
+    };
+
+    audio.onerror = function () {
+      cleanup();
+      reject(new Error('Could not read the audio duration. Try another audio file.'));
+    };
+
+    audio.src = objectUrl;
+  });
+  const cachedPromise = durationPromise.catch(function (err) {
+    audioDurationCache.delete(file);
+    throw err;
+  });
+  audioDurationCache.set(file, cachedPromise);
+  return cachedPromise;
+}
+
+async function setAudioDuration(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  try {
+    const totalSeconds = await getAudioDuration(file);
+    const form = input.closest('form');
+    form.elements.minutes.value = Math.floor(totalSeconds / 60);
+    form.elements.seconds.value = totalSeconds % 60;
+  } catch (err) {
+    showMessage(err.message, true);
+  }
+}
+
 // KUNG ASA ANG PLAYER CONTROLS YOUTUBE SECTION NI
 async function playSong(songId) {
   const requestId = ++playbackRequest;
@@ -671,7 +743,7 @@ async function playSong(songId) {
     }
     try {
       const response = await fetch('/api/songs/' + songId + '/audio', {
-        headers: { Authorization: token }
+        headers: { Authorization: 'Bearer ' + token }
       });
       if (requestId !== playbackRequest) { return; }
       if (!response.ok) {
@@ -765,7 +837,7 @@ function togglePlayback() {
     }
   } else {
     if (!ytPlayer || !ytPlayerReady) {
-      showMessage('The music player is still loading. Please try again in a moment.', true);
+      showMessage('The music player is still loading. Please try again.', true);
       return;
     }
     if (isPlaying) {
@@ -960,8 +1032,9 @@ async function loadSongs() {
     html += '<label>Genre <select name="genre_id">' + genreOptions(genres, '') + '</select></label>';
     html += '<label>Minutes <input type="number" name="minutes" min="0" value="3"></label>';
     html += '<label>Seconds <input type="number" name="seconds" min="0" max="59" value="0"></label>';
+    html += '<p class="muted">Duration is detected automatically when you choose an audio file.</p>';
     html += '<label>YouTube link or video ID <input type="text" name="youtube_id" placeholder="https://www.youtube.com/watch?v=..."></label>';
-    html += '<label>Or upload local music <input type="file" name="audio_file" accept="audio/*,video/mp4,.flac"></label>';
+    html += '<label>Or upload local music <input type="file" name="audio_file" accept="audio/*,video/mp4,.flac" onchange="setAudioDuration(this)"></label>';
     html += '<p class="muted">Local files are stored with your library on this server (maximum 50 MB each).</p>';
     html += '<button type="submit" class="primary">Add song</button>';
     html += '</div></form>';
@@ -1023,11 +1096,15 @@ function submitSong(event) {
     if (!audioFile && !youtubeId) {
       throw new Error('Add a YouTube link or choose a local audio file.');
     }
+    const duration = audioFile
+      ? await getAudioDuration(audioFile)
+      : readDuration(form.elements.minutes.value, form.elements.seconds.value);
+
     const created = await request('POST', '/songs', {
       title: form.elements.title.value,
       artist_id: albumCache[albumId].artist_id,
       album_id: albumId,
-      duration: readDuration(form.elements.minutes.value, form.elements.seconds.value),
+      duration: duration,
       genre_id: form.elements.genre_id.value,
       youtube_id: youtubeId
     });
@@ -1053,7 +1130,7 @@ async function requestAudioUpload(songId, file) {
     const response = await fetch('/api/songs/' + songId + '/audio', {
       method: 'PUT',
       headers: {
-        Authorization: token,
+        Authorization: 'Bearer ' + token,
         'Content-Type': file.type || 'application/octet-stream',
         'X-Audio-Filename': encodeURIComponent(file.name)
       },
@@ -1216,25 +1293,29 @@ async function editSong(songId) {
       { name: 'title', label: 'Title', value: song.song_title },
       { name: 'album_id', label: 'Album', type: 'select', options: albumList, value: song.album_id },
       { name: 'genre_id', label: 'Genre', type: 'select', options: genreList, value: song.genre_id },
-      { name: 'minutes', label: 'Minutes', type: 'number', value: Math.floor(song.duration / 60) },
-      { name: 'seconds', label: 'Seconds', type: 'number', value: song.duration % 60, max: 59 },
-      { name: 'youtube_id', label: 'YouTube Link or ID', value: song.youtube_id || '' },
-      { name: 'audio_file', label: 'Replace with a local audio file (optional)', type: 'file', accept: 'audio/*,video/mp4,.flac' }
+      { name: 'audio_file', label: 'Replace with a local audio file (optional)', type: 'file', accept: 'audio/*,video/mp4,.flac' },
+      { name: 'youtube_id', label: 'YouTube Link or ID', value: song.youtube_id || '' }
     ], async function (values) {
       if (values.audio_file && values.youtube_id.trim()) {
         throw new Error('Choose either a YouTube link or a local audio file, not both.');
       }
+      const duration = values.audio_file
+        ? await getAudioDuration(values.audio_file)
+        : song.duration;
+
       await request('PUT', '/songs/' + songId, {
         title: values.title,
         artist_id: albumCache[values.album_id].artist_id,
         album_id: values.album_id,
-        duration: readDuration(values.minutes, values.seconds),
+        duration: duration,
         genre_id: values.genre_id,
         youtube_id: values.audio_file ? '' : values.youtube_id
       });
+
       if (values.audio_file) {
         await requestAudioUpload(songId, values.audio_file);
       }
+
       showMessage('Song updated', false);
       await refreshPage();
     });

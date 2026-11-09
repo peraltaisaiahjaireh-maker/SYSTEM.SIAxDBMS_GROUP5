@@ -48,16 +48,25 @@ async function login(req, res) {
     if (!user) {
       throw makeError(401, 'Wrong email or password');
     }
-    const token = crypto.randomBytes(16).toString('hex');
-    sessions[token] = { user_id: user.user_id, username: user.username };
-    sendSuccess(res, 200, 'Logged in', { token: token, user_id: user.user_id, username: user.username });
+    const token = crypto.randomBytes(32).toString('hex');
+    sessions.set(token, {
+      user_id: user.user_id,
+      username: user.username,
+      expiresAt: Date.now() + 1000 * 60 * 60 * 8
+    });
+
+    sendSuccess(res, 200, 'Logged in', {
+      token: token,
+      user_id: user.user_id,
+      username: user.username
+    });
   } catch (err) {
     handleError(res, err);
   }
 }
 
 async function logout(req, res) {
-  delete sessions[req.token];
+  sessions.delete(req.token);
   sendSuccess(res, 200, 'Logged out', null);
 }
 
@@ -109,9 +118,9 @@ async function updateSettings(req, res) {
 async function deleteMe(req, res) {
   try {
     await model.deleteUser(req.user.user_id);
-    for (const token in sessions) {
-      if (sessions[token].user_id === req.user.user_id) {
-        delete sessions[token];
+    for (const [token, session] of sessions) {
+      if (session.user_id === req.user.user_id) {
+        sessions.delete(token);
       }
     }
     sendSuccess(res, 200, 'Account deleted', null);
