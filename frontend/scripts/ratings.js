@@ -45,7 +45,6 @@ function deleteComment(commentId) {
   runAction(function () { return request('DELETE', '/comments/' + commentId); }, 'Comment deleted', refreshPage);
 }
 
-// ISAIAH JAIREH S. PERALTA
 let artistCache = {};
 
 async function loadRatings() {
