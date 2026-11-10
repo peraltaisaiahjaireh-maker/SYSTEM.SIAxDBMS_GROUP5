@@ -165,7 +165,7 @@ async function requestAudioUpload(songId, file) {
     const response = await fetch('/api/songs/' + songId + '/audio', {
       method: 'PUT',
       headers: {
-        Authorization: token,
+        Authorization: 'Bearer ' + token,
         'Content-Type': file.type || 'application/octet-stream',
         'X-Audio-Filename': encodeURIComponent(file.name)
       },

@@ -1,161 +1,338 @@
-const MENU = [
-  ['songs', 'Songs'],
-  ['artists', 'Artists and Albums'],
-  ['playlists', 'Playlists'],
-  ['favorites', 'Favorites'],
-  ['queue', 'Queue'],
-  ['history', 'History'],
-  ['downloads', 'Downloads'],
-  ['ratings', 'My Ratings'],
-  ['reports', 'Reports'],
-  ['profile', 'Profile']
-];
+let ytApiLoading = false;
+let ytApiAvailable = false;
+let historySongId = null;
 
-function buildMenu() {
-  let html = '';
-  for (let i = 0; i < MENU.length; i++) {
-    html += '<li><a href="#" id="menu-' + MENU[i][0] + '" onclick="showPage(\'' + MENU[i][0] + '\'); return false;">' + MENU[i][1] + '</a></li>';
+localAudio.addEventListener('loadedmetadata', function () {
+  updatePlayerProgress(localAudio.currentTime, localAudio.duration);
+});
+localAudio.addEventListener('timeupdate', function () {
+  updatePlayerProgress(localAudio.currentTime, localAudio.duration);
+});
+localAudio.addEventListener('play', function () {
+  setPlaybackState(true);
+  recordSongHistory();
+});
+localAudio.addEventListener('pause', function () {
+  setPlaybackState(false);
+});
+localAudio.addEventListener('ended', playNextSong);
+localAudio.addEventListener('error', function () {
+  if (playingSong && playingSong.audio_path) {
+    const mediaError = localAudio.error;
+    const messages = {
+      1: 'Audio playback was interrupted.',
+      2: 'The audio file could not be loaded. Check that the upload still exists on the server.',
+      3: 'The audio file could not be decoded. It may be damaged.',
+      4: 'This audio format is unsupported or the uploaded file is missing.'
+    };
+    showMessage(messages[mediaError && mediaError.code] || 'The uploaded audio file could not be played.', true);
+    setPlaybackState(false);
   }
-  $('menu').innerHTML = html;
-}
+});
 
-//ISAIAH JAIREH S. PERALTA
-//OBJECT OR SET OF ARRAY LOADERS
-const LOADERS = {
-  songs: loadSongs,
-  song: loadSong,
-  artists: loadArtists,
-  playlists: loadPlaylists,
-  playlist: loadPlaylist,
-  favorites: loadFavorites,
-  queue: loadQueue,
-  history: loadHistory,
-  downloads: loadDownloads,
-  ratings: loadRatings,
-  reports: loadReports,
-  profile: loadProfile
-};
-
-// -showpage -refreshPage -openSong
-async function showPage(page, arg) {
-  currentPage = page;
-  currentArg = arg === undefined ? null : arg;
-  pageTurn++;
-  const myTurn = pageTurn;
-
-  let menuKey = page;
-  if (page === 'song') { menuKey = 'songs'; }
-  if (page === 'playlist') { menuKey = 'playlists'; }
-  for (let i = 0; i < MENU.length; i++) {
-    $('menu-' + MENU[i][0]).classList.toggle('active', MENU[i][0] === menuKey);
-  }
-
-  $('page').innerHTML = '<p class="muted">Loading...</p>';
-  try {
-    const html = await LOADERS[page](currentArg);
-    if (myTurn === pageTurn) {
-      $('page').innerHTML = html;
-    }
-  } catch (err) {
-    if (myTurn === pageTurn) {
-      $('page').innerHTML = '<p class="error-text">This page could not be loaded.</p>';
-      showMessage(err.message, true);
-    }
-  }
-}
-
-function refreshPage() {
-  return showPage(currentPage, currentArg);
-}
-
-function openSong(songId) {
-  showPage('song', songId);
-}
-
-// -openForm -closeForm -readDuration
-function openForm(title, fields, onSave) {
-  let html = '<h3>' + esc(title) + '</h3>';
-  for (let i = 0; i < fields.length; i++) {
-    const f = fields[i];
-    const value = f.value === undefined || f.value === null ? '' : f.value;
-    html += '<label>' + esc(f.label);
-    if (f.type === 'select') {
-      html += '<select name="' + f.name + '">';
-      for (let j = 0; j < f.options.length; j++) {
-        const selected = String(f.options[j].value) === String(value) ? ' selected' : '';
-        html += '<option value="' + esc(f.options[j].value) + '"' + selected + '>' + esc(f.options[j].label) + '</option>';
-      }
-      html += '</select>';
-    } else if (f.type === 'textarea') {
-      html += '<textarea name="' + f.name + '" maxlength="' + (f.max || 500) + '">' + esc(value) + '</textarea>';
-    } else if (f.type === 'file') {
-      html += '<input type="file" name="' + f.name + '" accept="' + esc(f.accept || '') + '">';
-    } else {
-      html += '<input type="' + (f.type || 'text') + '" name="' + f.name + '" value="' + esc(value) + '"';
-      if (f.type === 'number') {
-        html += ' min="' + (f.min === undefined ? 0 : f.min) + '"';
-        if (f.max !== undefined) { html += ' max="' + f.max + '"'; }
-      } else {
-        html += ' maxlength="' + (f.max || 100) + '"';
-      }
-      html += '>';
-    }
-    html += '</label>';
-  }
-  html += '<p class="error-text" id="dialogError"></p>';
-  html += '<button type="submit" class="primary">Save</button> ';
-  html += '<button type="button" onclick="closeForm()">Cancel</button>';
-
-  const form = $('dialogForm');
-  form.innerHTML = html;
-  form.onsubmit = async function (event) {
-    event.preventDefault();
-    const values = {};
-    for (let i = 0; i < fields.length; i++) {
-      const input = form.elements[fields[i].name];
-      values[fields[i].name] = fields[i].type === 'file' ? input.files[0] : input.value;
-    }
-    try {
-      await onSave(values);
-      closeForm();
-    } catch (err) {
-      $('dialogError').textContent = err.message;
-    }
-  };
-  $('dialog').showModal();
-}
-
-function closeForm() {
-  $('dialog').close();
-}
-
-function readDuration(minutes, seconds) {
-  const m = minutes === '' ? 0 : Number(minutes);
-  const s = seconds === '' ? 0 : Number(seconds);
-  if (!Number.isInteger(m) || !Number.isInteger(s) || m < 0 || s < 0) {
-    throw new Error('Length must be whole numbers');
-  }
-  if (s > 59) {
-    throw new Error('Seconds must be 59 or less');
-  }
-  if (m * 60 + s < 1) {
-    throw new Error('Length must be at least 1 second');
-  }
-  return m * 60 + s;
-}
-
-// KUNG ASA ANG PLAYER CONTROLS YOUTUBE SECTION NI
-async function start() {
-  if (!token) {
-    showLoginScreen('');
+function loadYouTubeAPI() {
+  if (window.YT && window.YT.Player) {
+    ytApiAvailable = true;
+    startPendingYouTubePlayback();
     return;
   }
+  if (ytApiLoading || ytApiFailed) {
+    return;
+  }
+
+  ytApiLoading = true;
+  const script = document.createElement('script');
+  script.src = 'https://www.youtube.com/iframe_api';
+  script.onerror = function () {
+    ytApiLoading = false;
+    ytApiFailed = true;
+    pendingYouTubeSongId = null;
+    showMessage('The YouTube player could not be loaded. Check your internet connection.', true);
+  };
+  document.head.appendChild(script);
+}
+
+function onYouTubeIframeAPIReady() {
+  ytApiAvailable = true;
+  ytApiLoading = false;
+  ytApiFailed = false;
+  startPendingYouTubePlayback();
+}
+
+function startPendingYouTubePlayback() {
+  if (!ytApiAvailable || !pendingYouTubeSongId) {
+    return;
+  }
+  const videoId = pendingYouTubeSongId;
+  pendingYouTubeSongId = null;
+  playYouTubeVideo(videoId);
+}
+
+async function playSong(songId) {
+  const requestId = ++playbackRequest;
+  let song = songCache[songId];
+  if (!song) {
+    try {
+      song = await request('GET', '/songs/' + songId);
+    } catch (err) {
+      showMessage(err.message, true);
+      return;
+    }
+    if (requestId !== playbackRequest) {
+      return;
+    }
+    cacheSongs([song]);
+  }
+
+  if (!song.youtube_id && !song.audio_path) {
+    showMessage('This song has no playable audio source.', true);
+    return;
+  }
+
+  playingSong = song;
+  historySongId = null;
+  $('playerTitle').textContent = song.song_title || song.title || 'Unknown song';
+  $('playerArtist').textContent = song.artist_name || 'Unknown artist';
+  $('playerTime').textContent = formatTime(Number(song.duration) || 0);
+  $('playerElapsed').textContent = '0:00';
+  $('playerSeek').value = '0';
+
+  localAudio.pause();
+  localAudio.removeAttribute('src');
+  localAudio.load();
+  $('yt-player-container').classList.add('hidden');
+
+  if (song.youtube_id) {
+    pendingYouTubeSongId = String(song.youtube_id);
+    loadYouTubeAPI();
+    return;
+  }
+
+  if (ytPlayer && ytPlayerReady) {
+    ytPlayer.stopVideo();
+  }
+  localAudio.src = song.audio_path;
+  localAudio.volume = Number($('playerVolume').value) / 100;
   try {
-    await startApp();
+    await localAudio.play();
   } catch (err) {
-    showLoginScreen('Please log in again.');
+    if (requestId === playbackRequest) {
+      const message = err && err.name === 'NotAllowedError'
+        ? 'The browser blocked playback. Press Play again.'
+        : 'Playback could not start: ' + (err && err.message ? err.message : 'unknown audio error');
+      showMessage(message, true);
+      setPlaybackState(false);
+    }
   }
 }
 
-loadYouTubeAPI();
-start();
+function playYouTubeVideo(videoId) {
+  if (!videoId || !window.YT || !window.YT.Player || !playingSong) {
+    return;
+  }
+  $('yt-player-container').classList.remove('hidden');
+  if (ytPlayer && ytPlayerReady) {
+    ytPlayer.loadVideoById(videoId);
+    ytPlayer.setVolume(Number($('playerVolume').value));
+    return;
+  }
+  if (ytPlayer) {
+    pendingYouTubeSongId = videoId;
+    return;
+  }
+
+  ytPlayerReady = false;
+  ytPlayer = new window.YT.Player('yt-player-container', {
+    width: '240',
+    height: '135',
+    videoId: videoId,
+    playerVars: { playsinline: 1 },
+    events: {
+      onReady: function (event) {
+        ytPlayerReady = true;
+        event.target.setVolume(Number($('playerVolume').value));
+        if (pendingYouTubeSongId) {
+          const nextVideoId = pendingYouTubeSongId;
+          pendingYouTubeSongId = null;
+          event.target.loadVideoById(nextVideoId);
+        }
+      },
+      onStateChange: function (event) {
+        if (!window.YT || !window.YT.PlayerState) {
+          return;
+        }
+        if (event.data === window.YT.PlayerState.PLAYING) {
+          setPlaybackState(true);
+          recordSongHistory();
+          updatePlayerProgress(event.target.getCurrentTime(), event.target.getDuration());
+        } else if (event.data === window.YT.PlayerState.PAUSED ||
+          event.data === window.YT.PlayerState.ENDED) {
+          setPlaybackState(false);
+          if (event.data === window.YT.PlayerState.ENDED) {
+            playNextSong();
+          }
+        }
+      },
+      onError: function () {
+        setPlaybackState(false);
+        showMessage('This YouTube video could not be played.', true);
+      }
+    }
+  });
+}
+
+function setPlaybackState(playing) {
+  isPlaying = playing;
+  const button = $('playPauseButton');
+  button.textContent = playing ? 'Ⅱ' : '▶';
+  button.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  button.title = playing ? 'Pause' : 'Play';
+}
+
+async function recordSongHistory() {
+  if (!playingSong || historySongId === playingSong.song_id) {
+    return;
+  }
+  historySongId = playingSong.song_id;
+  try {
+    await request('POST', '/history', { song_id: playingSong.song_id });
+  } catch (err) {
+    historySongId = null;
+    showMessage('Could not save listening history: ' + err.message, true);
+  }
+}
+
+function updatePlayerProgress(currentTime, duration) {
+  const elapsed = Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0;
+  const total = Number.isFinite(duration) && duration > 0 ? duration : Number(playingSong && playingSong.duration) || 0;
+  $('playerElapsed').textContent = formatTime(Math.floor(elapsed));
+  if (total > 0) {
+    $('playerTime').textContent = formatTime(Math.floor(total));
+    $('playerSeek').value = String(Math.round(Math.min(elapsed / total, 1) * 1000));
+  }
+}
+
+function togglePlayback() {
+  if (!playingSong) {
+    if (playbackList.length > 0) {
+      playSong(playbackList[0].song_id);
+    }
+    return;
+  }
+  if (playingSong.youtube_id) {
+    if (!ytPlayer || !ytPlayerReady) {
+      pendingYouTubeSongId = String(playingSong.youtube_id);
+      loadYouTubeAPI();
+      return;
+    }
+    if (isPlaying) {
+      ytPlayer.pauseVideo();
+    } else {
+      ytPlayer.playVideo();
+    }
+  } else if (localAudio.paused) {
+    localAudio.play().catch(function () {
+      showMessage('Playback could not start. Try pressing Play again.', true);
+    });
+  } else {
+    localAudio.pause();
+  }
+}
+
+function seekSong(value) {
+  const fraction = Math.max(0, Math.min(Number(value) / 1000, 1));
+  if (playingSong && playingSong.youtube_id && ytPlayer && ytPlayerReady) {
+    const duration = ytPlayer.getDuration();
+    if (duration > 0) {
+      ytPlayer.seekTo(duration * fraction, true);
+    }
+  } else if (Number.isFinite(localAudio.duration) && localAudio.duration > 0) {
+    localAudio.currentTime = localAudio.duration * fraction;
+  }
+}
+
+function setPlayerVolume(value) {
+  const volume = Math.max(0, Math.min(Number(value), 100));
+  localAudio.volume = volume / 100;
+  if (ytPlayer && ytPlayerReady) {
+    ytPlayer.setVolume(volume);
+  }
+}
+
+function stopSong() {
+  playbackRequest++;
+  pendingYouTubeSongId = null;
+  localAudio.pause();
+  localAudio.removeAttribute('src');
+  localAudio.load();
+  if (ytPlayer && ytPlayerReady) {
+    ytPlayer.stopVideo();
+  }
+  playingSong = null;
+  historySongId = null;
+  $('playerTitle').textContent = 'Nothing playing';
+  $('playerArtist').textContent = 'Choose a song to get started';
+  $('playerElapsed').textContent = '0:00';
+  $('playerTime').textContent = '0:00';
+  $('playerSeek').value = '0';
+  $('yt-player-container').classList.add('hidden');
+  setPlaybackState(false);
+}
+
+function playPreviousSong() {
+  if (!playingSong) {
+    return;
+  }
+  if (playingSong.youtube_id) {
+    if (ytPlayer && ytPlayerReady) {
+      ytPlayer.seekTo(0, true);
+    }
+    return;
+  }
+  if (playbackList.length < 2) {
+    if (localAudio.currentTime > 3) {
+      localAudio.currentTime = 0;
+    }
+    return;
+  }
+  const index = playbackList.findIndex(function (song) {
+    return song.song_id === playingSong.song_id;
+  });
+  if (index > 0) {
+    playSong(playbackList[index - 1].song_id);
+  } else {
+    localAudio.currentTime = 0;
+  }
+}
+
+function playNextSong() {
+  if (!playingSong || playbackList.length < 2) {
+    stopSong();
+    return;
+  }
+  const index = playbackList.findIndex(function (song) {
+    return song.song_id === playingSong.song_id;
+  });
+  if (index >= 0 && index < playbackList.length - 1) {
+    playSong(playbackList[index + 1].song_id);
+  } else {
+    stopSong();
+  }
+}
+
+function startGenreHopMix() {
+  if (playbackList.length === 0) {
+    showMessage('There are no songs available for a genre-hop mix.', true);
+    return;
+  }
+  const songs = playbackList.slice();
+  for (let i = songs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [songs[i], songs[j]] = [songs[j], songs[i]];
+  }
+  playbackList = songs;
+  playSong(songs[0].song_id);
+}
+
+setPlaybackState(false);
+$('yt-player-container').classList.add('hidden');
