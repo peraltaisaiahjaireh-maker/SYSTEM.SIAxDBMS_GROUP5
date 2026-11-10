@@ -1,11 +1,15 @@
 // serves the API and the frontend files.
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const express = require('express');
 const db = require('./config/db');
 const apiRoutes = require('./routes/apiRoutes');
 const { sendError, handleError } = require('./controllers/helpers');
+
+const uploadsDir = path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const app = express();
 
@@ -16,6 +20,9 @@ app.use('/api', apiRoutes);
 app.use('/api', function (req, res) {
   sendError(res, 404, 'That API address does not exist');
 });
+
+app.use('/media', express.static(uploadsDir));
+app.use('/uploads', express.static(uploadsDir));
 
 // frontend 
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
