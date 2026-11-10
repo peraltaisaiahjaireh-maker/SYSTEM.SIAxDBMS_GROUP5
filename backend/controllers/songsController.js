@@ -2,7 +2,7 @@
 // SONGS AND GENRES
 const {
   crypto, fs, path, uploadsDir, AUDIO_EXTENSIONS,
-  sendSuccess, handleError, makeError,
+  sendSuccess, sendError, handleError, makeError,
   cleanText, cleanNumber, cleanOptionalNumber, extractYouTubeId,
   loadSong, removeStoredAudio
 } = require('./helpers');
@@ -94,34 +94,22 @@ async function uploadSongAudio(req, res) {
     if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
       throw makeError(400, 'Choose an audio file to upload');
     }
-    const rawFilename = req.headers['x-audio-filename'] || '';
-    let filename = '';
 
+    let filename;
     try {
-      filename = decodeURIComponent(rawFilename);
+      filename = decodeURIComponent(req.headers['x-audio-filename'] || '');
     } catch (err) {
       throw makeError(400, 'The audio filename is invalid');
     }
-
-    const safeFilename = path.basename(filename);
-    if (!safeFilename || safeFilename !== filename || safeFilename.includes('..')) {
-      throw makeError(400, 'The audio filename is invalid');
-    }
-
-    const extension = path.extname(safeFilename).toLowerCase();
+    const extension = path.extname(filename).toLowerCase();
     if (!AUDIO_EXTENSIONS.includes(extension)) {
       throw makeError(400, 'Choose an MP3, M4A, AAC, OGG, WAV, FLAC, or MP4 audio file');
     }
-
     const contentType = req.headers['content-type'] || '';
-    if (
-      !contentType.startsWith('audio/') &&
-      contentType !== 'application/octet-stream' &&
-      !(contentType === 'video/mp4' && extension === '.mp4')
-    ) {
+    if (!contentType.startsWith('audio/') && contentType !== 'application/octet-stream' &&
+      !(contentType === 'video/mp4' && extension === '.mp4')) {
       throw makeError(400, 'The uploaded file is not a supported audio type');
     }
-
 
     const storedName = crypto.randomBytes(16).toString('hex') + extension;
     uploadedPath = path.join(uploadsDir, storedName);
@@ -151,8 +139,18 @@ async function streamSongAudio(req, res) {
       throw makeError(404, 'This song has no uploaded audio file');
     }
     const filename = path.basename(song.audio_path);
+    
+    const fullPath = path.join(uploadsDir, filename);
+    try {
+      await fs.promises.access(fullPath, fs.constants.F_OK);
+    } catch (err) {
+      throw makeError(404, 'This audio file is missing from the server');
+    }
     res.sendFile(filename, { root: uploadsDir }, function (err) {
       if (err && !res.headersSent) {
+        if (err.code === 'ENOENT') {
+          return sendError(res, 404, 'This audio file is missing from the server');
+        }
         handleError(res, err);
       }
     });
