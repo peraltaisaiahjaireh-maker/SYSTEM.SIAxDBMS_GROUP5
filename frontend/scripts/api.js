@@ -4,7 +4,7 @@ async function request(method, url, body) {
   try {
     const options = { method: method, headers: { 'Content-Type': 'application/json' } };
     if (token) {
-      options.headers['Authorization'] = token;
+      options.headers['Authorization'] = 'Bearer ' + token;
     }
     if (body !== undefined) {
       options.body = JSON.stringify(body);

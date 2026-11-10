@@ -157,5 +157,4 @@ async function start() {
   }
 }
 
-loadYouTubeAPI();
 start();
