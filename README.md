@@ -43,7 +43,6 @@ SOUNDSYNC/
 |   |   |---playlistsController.js
 |   |   |---ratingsController.js
 |   |   |---songsController.js
-│   │   |--- soundSyncModel.js
 │   |-- controllers/
 |   |   |---accountModel.js
 |   |   |---artistsModel.js
@@ -51,11 +50,21 @@ SOUNDSYNC/
 |   |   |---playlistsModel.js
 |   |   |---ratingsModel.js
 |   |   |---songsModel.js
-│   │   |--- soundSyncController.js
 │   |-- routes/
 │   │   |--- apiRoutes.js
 │   |-- server.js
 |-- frontend/
+|   |-- scripts
+|   |   |---acount.js
+|   |   |---api.js
+|   |   |---artists.js
+|   |   |---core.js
+|   |   |---library.js
+|   |   |---player.js
+|   |   |---playlists.js
+|   |   |---ratings.js
+|   |   |---reports.js
+|   |   |---songs.js
 │   |-- index.html
 │   |-- style.css
 │   |-- app.js
@@ -72,8 +81,8 @@ SOUNDSYNC/
 | Morte, GJ-Chyll | Yuzuu021 Chyllpogi · he/him | `ratings`, `comments` | `/ratings`, `/ratings/:id`, `/songs/:id/comments`, `/comments/:id`, `/reports/songs`, `/reports/users-playlists`, `/reports/users-playlists-full` - `RATINGS` | (2) INNER JOIN `Song Ratings Report`, `Song comments Report` | Partial full-Stack Lead (server.js, MVC ratingsController.js/ratingsModel.js, database queries, and HTML/CSS/JS frontend) |
 | Salva, Jherald | salvajherald131-eng `jheraldd01` | `songs`, `genres`, `song_genres` | `/songs`, `/songs/:id/audio`, `/songs/:id`, `/songs`, `/genres` `SONGS` | (3) INNER JOIN `Song Detail Report`, `Song Genre Report`, `Users Playlists Reports` | Partial Full-Stack Developer & Data Modeler (songsController.js, songsModels.js, Database Tables/Flowcharts, Frontend JS) |
 | Paligsa, Harde Jeams | hardejeamspaligsa-dot | `users`, `profiles`, `settings` | `/users`, `/login`, `/logout`, `/users/me`, `/settings` | (1) LEFT JOIN and (1) FULL OUTER JOIN `User Playlists Report`, `Song Genre Audit`| Partial Full-Stack Lead (accountController.js, accountModel.js, Master DB Queries/Tables, Frontend JS) |
-| Superio, Anthony | anthonysuperio4 | `playlists`, `playlist_songs` | `/playlists`, `playlist/:id`, `/playlist/:id/songs`, `/playlists/:id/songs/:songId` | (1) INNER JOIN `Playlist Songs Report` | Partial Full-Stack Developer (Backend Controllers & Models, Database Tables, Frontend JS) |
-| Sienes, Jadge Ethan Roy | jadgeethansienes | `favorites`, `downloads`, `queue`, `history` | `/favorites`, `/favorites/:songId`, `/downloads`, `/downloads/:id`, `/queue`, `/queue/:id`, `/history` | (4) INNER JOIN `Favorite Songs Report` `Downloaded Songs Report`, `Queue Report`, `Play History Report` | Partial Full-Stack Lead: MVC Controllers & Models, Database Tables, Frontend JavaScript |
+| Superio, Anthony | anthonysuperio4 | `playlists`, `playlist_songs` | `/playlists`, `playlist/:id`, `/playlist/:id/songs`, `/playlists/:id/songs/:songId` | (1) INNER JOIN `Playlist Songs Report` | Partial Full-Stack Developer (playlistsController.js, playlistsModel.js, Partial Master DB Queries/Tables, Frontend JS) |
+| Sienes, Jadge Ethan Roy | jadgeethansienes | `favorites`, `downloads`, `queue`, `history` | `/favorites`, `/favorites/:songId`, `/downloads`, `/downloads/:id`, `/queue`, `/queue/:id`, `/history` | (4) INNER JOIN `Favorite Songs Report` `Downloaded Songs Report`, `Queue Report`, `Play History Report` | Partial Full-Stack Lead (libraryController.js, libraryModel.js, Partial Master DB Queries/Tables, Frontend JS) |
 
 `Partial Full-Stack Developer: Used informally to describe handling both frontend and backend tasks without taking full ownership of the overall system architecture.`
 
@@ -89,6 +98,13 @@ SOUNDSYNC/
 
 ## How to run our System
 ```
+NEED TO INSTALL
+-VSCODE
+-WEB DEV EXTENTIONS
+-GIT
+-MYSQL (COMMAND LINE CLIENT 0R WORKBENCH (MUST HAVE AT LEAST 1 OF THIS MYSQL TOOLS) )
+-.drawio (FOR FLOW CHART DATABASE TABLES VSCODE_EXTENSIONS)
+
 1. git clone 
 2. Set-up MySQL local database
    -CREATE DATABASE soundSync;
@@ -99,13 +115,6 @@ SOUNDSYNC/
    -On .env and /config/db.js set-up your connections to MySQL database
 3. npm install
 4. npm start/npm run start
-
-NEED TO INSTALL
--VSCODE
--WEB DEV EXTENTIONS
--GIT
--MYSQL (COMMAND LINE CLIENT 0R WORKBENCH (MUST HAVE AT LEAST 1 OF THIS MYSQL TOOLS) )
--.drawio (FOR FLOW CHART DATABASE TABLES VSCODE_EXTENSIONS)
 ```
 
 ## My attendance checking per member (SpreedSheet)
