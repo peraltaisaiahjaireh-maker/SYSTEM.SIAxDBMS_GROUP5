@@ -124,6 +124,4 @@ https://docs.google.com/spreadsheets/d/1zuETq0kWIjtRhXhYhnpYZzag4OmcPYLptCJ21FFM
 ```
 
 ## Important Info for our git Branches 
-``` 
 We made multiple branches before due git push error that we cannot resolve, however they are still recorded commits from those deleted branches.
-```
