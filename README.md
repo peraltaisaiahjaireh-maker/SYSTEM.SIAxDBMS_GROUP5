@@ -115,9 +115,15 @@ NEED TO INSTALL
    -On .env and /config/db.js set-up your connections to MySQL database
 3. npm install
 4. npm start/npm run start
+5. On your browser enter this <http://localhost:5000> to access our screens. 
 ```
 
 ## My attendance checking per member (SpreedSheet)
 ```
 https://docs.google.com/spreadsheets/d/1zuETq0kWIjtRhXhYhnpYZzag4OmcPYLptCJ21FFMBj4/edit?usp=sharing
+```
+
+## Important Info for our git Branches 
+``` 
+We made multiple branches before due git push error that we cannot resolve, however they are still recorded commits from those deleted branches.
 ```
